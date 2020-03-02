@@ -1,0 +1,44 @@
+{
+  "name": "chat",
+  "version": "0.0.1",
+  "description": "API of real-time chat based on Node.js, MongoDB, WebSocket, Redis",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stanisdev/chat.git"
+  },
+  "keywords": [
+    "chat",
+    "node.js",
+    "mongodb",
+    "redis",
+    "websocket",
+    "real-time",
+    "api"
+  ],
+  "author": "Stanislav Zavalishin <javascript.nodejs.developer@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stanisdev/chat/issues"
+  },
+  "homepage": "https://github.com/stanisdev/chat#readme",
+  "dependencies": {
+    "fastify": "2.12.1",
+    "fastify-plugin": "1.6.1",
+    "make-promises-safe": "5.1.0",
+    "mongoose": "5.9.2",
+    "nanoid": "2.1.11"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "nodemon": "^2.0.2"
+  }
+}
