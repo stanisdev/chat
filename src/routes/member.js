@@ -2,7 +2,7 @@
 
 class Member {
   constructor() {
-    this.prefix = 'member';
+    this.prefix = '/member';
   }
 
   /**

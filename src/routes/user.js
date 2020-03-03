@@ -1,7 +1,9 @@
 'use string'
 
 class User {
-  constructor() {}
+  constructor() {
+    this.prefix = '/user';
+  }
 }
 
 module.exports = User;

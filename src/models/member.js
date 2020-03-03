@@ -1,9 +1,9 @@
 'use string'
 
-const { Schema } = require('mongoose');
+const mongoose = require('mongoose');
 const nanoid = require('nanoid');
 
-const memberSchema = new Schema({
+const memberSchema = new mongoose.Schema({
   _id: {
     type: String,
     default() {
@@ -35,4 +35,4 @@ const memberSchema = new Schema({
   }
 });
 
-module.exports = memberSchema;
+module.exports = mongoose.model('Member', memberSchema);
