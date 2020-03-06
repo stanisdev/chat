@@ -5,9 +5,10 @@ const mongoose = require('mongoose');
 const glob = require('glob');
 const path = require('path');
 
-async function db(fastify, options) {
+async function db(fastify, opts) {
+  const { host, port, db, options } = fastify.config.mongo;
   try {
-    await mongoose.connect('mongodb://localhost:27017/chat', { useNewUrlParser: true, useUnifiedTopology: true }); // @todo: move to config
+    await mongoose.connect(`mongodb://${host}:${port}/${db}`, options); // @todo: add user/password
   } catch (err) {
     fastify.log.error(err);
   }

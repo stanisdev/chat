@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose');
 const nanoid = require('nanoid');
+const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
   _id: {
@@ -19,6 +20,12 @@ const userSchema = new mongoose.Schema({
     maxlength: 50,
     required: true
   },
+  name: {
+    type: String,
+    minlength: 1,
+    maxlength: 60,
+    required: true
+  },
   password: {
     type: String,
     required: true
@@ -27,16 +34,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  name: {
-    type: String,
-    minlength: 1,
-    maxlength: 60,
-    required: true
-  },
   avatar: {
     type: String,
     maxlength: 200
   }
 });
+
+const instanceMethods = {
+  async cryptPassword() {
+    const salt = nanoid(6);
+    this.salt = salt;
+    this.password = await bcrypt.hash(this.password + salt, 10);
+  }
+};
+
+userSchema.methods = instanceMethods;
 
 module.exports = mongoose.model('User', userSchema);
