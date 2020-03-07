@@ -2,6 +2,7 @@
 
 const path = require('path');
 const rootDir = path.dirname(__dirname);
+const { env } = process;
 
 const config = {
   rootDir,
@@ -16,6 +17,13 @@ const config = {
       useNewUrlParser: true,
       useUnifiedTopology: true
     }
+  },
+  server: {
+    ignoreTrailingSlash: true,
+    logger: true
+  },
+  jwt: {
+    secret: env.JWT_SECRET || 'k6b8JHnLCrH4dE6nkxprYLF49'
   }
 };
 

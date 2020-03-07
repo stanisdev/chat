@@ -31,9 +31,6 @@ class Routes {
         let [httpMethod, url] = routeParams.split(': ');
         if (typeof prefix === 'string') {
           url = prefix + url;
-          if (prefix.length === (url.length - 1)) {
-            url = url.slice(0, -1);
-          }
         }
         const essential = instance[routeParams]();
         if (!(essential instanceof Object)) {
@@ -44,7 +41,7 @@ class Routes {
          * Define schema
          */
         const schema = {};
-        const { params, query, body, res } = essential;
+        const { params, query, body, res, auth } = essential;
 
         if (params instanceof Object) {
           schema.params = this.getBlankValidator(params);
@@ -65,6 +62,9 @@ class Routes {
           schema,
           handler: essential.h
         };
+        if (auth) {
+          result.preValidation = [this.fastify.authenticate];
+        }
         this.fastify.route(result);
       });
   }
@@ -96,6 +96,27 @@ class Routes {
       200: {
         type: 'object',
         properties
+      },
+      '4xx': {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          errors: {
+            type: 'object',
+            patternProperties: {
+              "^[a-z0-9]+$": { type: 'string' }
+            },
+            maxProperties: 5
+          },
+          message: { type: 'string' }
+        }
+      },
+      '5xx': {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          message: { type: 'string' }
+        }
       }
     };
   }

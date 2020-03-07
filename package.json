@@ -30,6 +30,7 @@
     "@hapi/boom": "9.0.0",
     "bcrypt": "4.0.1",
     "fastify": "2.12.1",
+    "fastify-jwt": "1.2.1",
     "fastify-plugin": "1.6.1",
     "glob": "7.1.6",
     "lodash": "4.17.15",

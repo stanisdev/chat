@@ -45,6 +45,10 @@ const instanceMethods = {
     const salt = nanoid(6);
     this.salt = salt;
     this.password = await bcrypt.hash(this.password + salt, 10);
+  },
+
+  checkPassword(password) {
+    return bcrypt.compare(password + this.salt, this.password);
   }
 };
 

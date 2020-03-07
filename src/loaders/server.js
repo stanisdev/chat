@@ -1,14 +1,14 @@
 'use string'
 
-const fastify = require('fastify')({ logger: true });
-const Boom = require('@hapi/boom');
 const config = require('../config');
+const fastify = require('fastify')(config.server);
 
 fastify.decorate('config', config);
 fastify.register(require('./db'));
 fastify.register(require('./boom'));
 fastify.register(require('./services'));
 fastify.register(require('./errors'));
+fastify.register(require('./jwt'));
 fastify.register(require('./routes'));
 
 (async () => {

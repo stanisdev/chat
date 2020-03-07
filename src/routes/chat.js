@@ -8,7 +8,15 @@ class Chat {
   /**
    * All user's chats
    */
-  ['GET: /']() {}
+  ['GET: /']() {
+    return {
+      auth: true,
+      async h(req) {
+        // req.user
+        return { ok: true };
+      }
+    };
+  }
 
   /**
    * Messages of specific chat
