@@ -8,6 +8,7 @@ const config = {
   rootDir,
   routesDir: path.join(rootDir, 'routes'),
   servicesDir: path.join(rootDir, 'services'),
+  filtersDir: path.join(rootDir, 'filters'),
   port: 3000,
   mongo: {
     host: 'localhost',

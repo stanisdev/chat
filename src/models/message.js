@@ -34,6 +34,7 @@ const messageSchema = new mongoose.Schema({
     default: false
   },
   statuses: [{
+    _id: false,
     recipient_id: {
       type: 'String',
       ref: 'User',
@@ -47,7 +48,9 @@ const messageSchema = new mongoose.Schema({
      */
     value: {
       type: Number,
-      default: 0
+      default: 0,
+      min: 0,
+      max: 2
     }
   }]
 }, {

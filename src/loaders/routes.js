@@ -41,7 +41,7 @@ class Routes {
          * Define schema
          */
         const schema = {};
-        const { params, query, body, res, auth } = essential;
+        const { params, query, body, res, auth, filters } = essential;
 
         if (params instanceof Object) {
           schema.params = this.getBlankValidator(params);
@@ -65,8 +65,24 @@ class Routes {
         if (auth) {
           result.preValidation = [this.fastify.authenticate];
         }
+        if (Array.isArray(filters)) {
+          this.setFilters(filters, result);
+        }
         this.fastify.route(result);
       });
+  }
+
+  setFilters(filters, result) {
+    filters.forEach(filter => {
+      const [ className, methodName ] = filter.split('.');
+      const filterFunction = this.fastify.filters[className][methodName];
+
+      if (Array.isArray(result.preValidation)) {
+        result.preValidation.push(filterFunction);
+      } else {
+        result.preValidation = [filterFunction];
+      }
+    });
   }
 
   getBlankValidator(properties) {
