@@ -12,6 +12,7 @@ async function db(fastify, opts) {
   } catch (err) {
     fastify.log.error(err);
   }
+  mongoose.set('debug', true);
   const models = {};
 
   glob

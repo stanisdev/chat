@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
+    // unique: true, // @todo: uncomment this
     lowercase: true,
     trim: true,
     minlength: 6,
@@ -38,6 +38,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     maxlength: 200
   }
+}, {
+  timestamps: {
+    createdAt: 'created_at',
+    updatedAt: 'updated_at'
+  }
 });
 
 const instanceMethods = {
@@ -52,6 +57,16 @@ const instanceMethods = {
   }
 };
 
+const staticMethods = {
+  countByIds(ids) {
+    ids = ids.map(id => {
+      return { _id: id };
+    });
+    return this.count({ $or: ids });
+  }
+};
+
 userSchema.methods = instanceMethods;
+userSchema.statics = staticMethods;
 
 module.exports = mongoose.model('User', userSchema);

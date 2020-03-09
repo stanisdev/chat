@@ -20,8 +20,7 @@ class AuthService {
     await user.save();
   }
 
-  async login(body) {
-    const { email, password } = body;
+  async login({ email, password }) {
     const user = await this.db.User.findOne({ email });
     if (!(user instanceof Object)) {
       throw this.Boom.badRequest(this.wrongCredentials);
@@ -30,7 +29,7 @@ class AuthService {
     if (!isValid) {
       throw this.Boom.badRequest(this.wrongCredentials);
     }
-    return pick(user, ['id', 'name']);
+    return pick(user, ['_id', 'name']);
   }
 }
 

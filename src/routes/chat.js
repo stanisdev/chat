@@ -1,5 +1,7 @@
 'use string'
 
+const { pick } = require('lodash');
+
 class Chat {
   constructor() {
     this.prefix = '/chat';
@@ -44,14 +46,40 @@ class Chat {
   }
 
   /**
-   * Add new message
-   */
-  ['POST: /:id']() {}
-
-  /**
    * Create chat
    */
-  ['PUT: /']() {}
+  ['PUT: /']() {
+    return {
+      auth: true,
+      body: {
+        type: {
+          type: 'integer',
+          enum: [0, 1]
+        },
+        members: {
+          type: 'array',
+          minItems: 1,
+          items: { type: 'string' }
+        },
+        Required: ['type', 'members']
+      },
+      res: {
+        chat: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' }
+          }
+        }
+      },
+      async h(req) {
+        const chat = await this.serviceChat.create(req.user, req.body);
+        return {
+          ok: true,
+          chat: pick(chat, ['id'])
+        };
+      }
+    };
+  }
 
   /**
    * Delete chat
