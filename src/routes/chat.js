@@ -11,12 +11,51 @@ class Chat {
    * Get user's chats
    */
   ['GET: /']() {
+    const limitConfig = this.config.chats.limit;
     return {
-      description: 'Get list of user\'s chats (@hint: this endpoint is not finished yet)',
+      description: 'Get list of user\'s chats',
       auth: true,
+      query: {
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: limitConfig.max
+        },
+        page: { type: 'integer', minimum: 0 }
+      },
+      res: {
+        chats: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              type: { type: 'number' },
+              last_message: {
+                type: 'object',
+                properties: {} // @todo: describe schema
+              }
+            }
+          }
+        }
+      },
       async h(req) {
-        // req.user
-        return { ok: true };
+        const { query } = req;
+        let limit = limitConfig.default;
+        let page = 1;
+        if (Number.isInteger(query.limit)) {
+          limit = query.limit;
+        }
+        if (Number.isInteger(query.page)) {
+          page = query.page;
+        }
+        const chats = await this.serviceChat.getMany(req.user._id, { limit, page });
+        return {
+          ok: true,
+          chats: chats.map(chat => {
+            return pick(chat, ['id', 'type']);
+          })
+        };
       }
     };
   }

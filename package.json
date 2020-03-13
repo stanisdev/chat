@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "local": "NODE_ENV=local nodemon src/app.js"
+    "local": "NODE_ENV=local PORT=4000 nodemon src/app.js",
+    "start": "NODE_ENV=production PORT=3000 node src/app.js"
   },
   "repository": {
     "type": "git",

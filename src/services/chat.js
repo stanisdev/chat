@@ -39,6 +39,17 @@ class ChatService {
     const newChat = new Chat({ type, members });
     return newChat.save();
   }
+
+  getMany(userId, { limit, page }) {
+    return this.db.Chat.findAndPaginate({
+      query: {
+        'members.user_id': userId
+      },
+      limit,
+      page,
+      sort: { created_at: -1 }
+    });
+  }
 }
 
 module.exports = ChatService;

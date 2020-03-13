@@ -9,7 +9,7 @@ const config = {
   routesDir: path.join(rootDir, 'routes'),
   servicesDir: path.join(rootDir, 'services'),
   filtersDir: path.join(rootDir, 'filters'),
-  port: 3000,
+  port: env.PORT || 3000,
   mongo: {
     host: 'localhost',
     port: 27017,
@@ -25,6 +25,12 @@ const config = {
   },
   jwt: {
     secret: env.JWT_SECRET || 'k6b8JHnLCrH4dE6nkxprYLF49'
+  },
+  chats: {
+    limit: {
+      max: 50,
+      default: 10
+    }
   }
 };
 

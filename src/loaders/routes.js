@@ -17,6 +17,7 @@ class Routes {
     this.files.forEach(file => {
       const Class = require(file);
       const instance = new Class();
+      Class.prototype.config = this.fastify.config;
       this.iterateClassMethods(Class, instance);
     });
   }
@@ -24,9 +25,11 @@ class Routes {
   iterateClassMethods(Class, instance) {
     Object
       .getOwnPropertyNames(Class.prototype)
-      .filter(m => m !== 'constructor')
+      .filter(methodName => {
+        return !['constructor', 'config'].includes(methodName);
+      })
       .forEach(routeParams => {
-        
+
         const { prefix } = instance;
         let [httpMethod, url] = routeParams.split(': ');
         if (typeof prefix === 'string') {
