@@ -10,6 +10,7 @@ class Auth {
    */
   ['POST: /register']() {
     return {
+      description: 'Registration a new user',
       body: {
         email: {
           type: 'string',
@@ -33,6 +34,7 @@ class Auth {
    */
   ['POST: /login']() {
     return {
+      description: 'Login a user and return JWT token',
       body: {
         email: {
           type: 'string',

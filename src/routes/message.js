@@ -10,6 +10,7 @@ class Message {
    */
   ['POST: /:chat_id']() {
     return {
+      description: 'Adding new message to certain chat',
       auth: true,
       filters: ['chat.isMember'],
       body: {

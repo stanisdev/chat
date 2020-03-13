@@ -10,6 +10,7 @@ fastify.register(require('./services'));
 fastify.register(require('./errors'));
 fastify.register(require('./jwt'));
 fastify.register(require('./filters'));
+fastify.register(require('./swagger'));
 fastify.register(require('./routes'));
 
 (async () => {

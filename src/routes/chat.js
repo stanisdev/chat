@@ -8,10 +8,11 @@ class Chat {
   }
 
   /**
-   * All user's chats
+   * Get user's chats
    */
   ['GET: /']() {
     return {
+      description: 'Get list of user\'s chats (@hint: this endpoint is not finished yet)',
       auth: true,
       async h(req) {
         // req.user
@@ -25,6 +26,7 @@ class Chat {
    */
   ['GET: /:id']() {
     return {
+      description: 'Get list of messages of certain chat (@hint: this endpoint is not finished yet)',
       params: {
         id: { type: 'string', maxLength: 8 }
       },
@@ -50,6 +52,7 @@ class Chat {
    */
   ['PUT: /']() {
     return {
+      description: 'Creating a new chat',
       auth: true,
       body: {
         type: {

@@ -41,7 +41,7 @@ class Routes {
          * Define schema
          */
         const schema = {};
-        const { params, query, body, res, auth, filters } = essential;
+        const { params, query, body, res, auth, filters, description } = essential;
 
         if (params instanceof Object) {
           schema.params = this.getBlankValidator(params);
@@ -53,6 +53,9 @@ class Routes {
         if (body instanceof Object) {
           schema.body = this.getBlankValidator(body);
           this.setRequired(schema.body);
+        }
+        if (typeof description === 'string') {
+          schema.description = description;
         }
         this.setResponse(schema, res);
 
