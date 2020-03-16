@@ -3,6 +3,9 @@
 class ChatService {
   constructor() {}
 
+  /**
+   * Create chat
+   */
   async create(userId, { type, members }) {
     members.push(userId);
 
@@ -40,6 +43,9 @@ class ChatService {
     return newChat.save();
   }
 
+  /**
+   * Get user's chats
+   */
   getMany(userId, { limit, page }) {
     return this.db.Chat.findAndPaginate({
       query: {

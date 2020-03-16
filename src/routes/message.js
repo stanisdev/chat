@@ -8,7 +8,7 @@ class Message {
   /**
    * Add new message
    */
-  ['POST: /:chat_id']() {
+  ['PUT: /:chat_id']() {
     return {
       description: 'Adding new message to certain chat',
       auth: true,
@@ -20,6 +20,9 @@ class Message {
           enum: ['text/plain', 'image/jpeg']
         },
         Required: ['content', 'type']
+      },
+      query: {
+        chat_id: { type: 'string' }
       },
       res: {
         message: {

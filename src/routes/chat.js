@@ -33,7 +33,15 @@ class Chat {
               type: { type: 'number' },
               last_message: {
                 type: 'object',
-                properties: {} // @todo: describe schema
+                properties: {
+                  content: { type: 'string' },
+                  type: { type: 'string' },
+                  author_name: { type: 'string' },
+                  created_at: {
+                    type: 'string',
+                    format: 'date'
+                  }
+                }
               }
             }
           }
@@ -49,13 +57,18 @@ class Chat {
         if (Number.isInteger(query.page)) {
           page = query.page;
         }
-        const chats = await this.serviceChat.getMany(req.user._id, { limit, page });
-        return {
-          ok: true,
-          chats: chats.map(chat => {
-            return pick(chat, ['id', 'type']);
-          })
-        };
+        let chats = await this.serviceChat.getMany(req.user._id, { limit, page });
+        const chatIds = [];
+        chats = chats.map(({ id, type }) => {
+          chatIds.push(id);
+          return { id, type };
+        });
+        const lastMessages = await this.db.Message.getLastMessages(chatIds);
+        chats.forEach(chat => {
+          const message = lastMessages.find(message => message.chat_id === chat.id);
+          chat.last_message = message instanceof Object ? message : {};
+        });
+        return { ok: true, chats };
       }
     };
   }
