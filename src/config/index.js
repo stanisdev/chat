@@ -31,6 +31,10 @@ const config = {
       max: 50,
       default: 10
     }
+  },
+  websocket: {
+    port: 8080,
+    maxPayload: 1048576
   }
 };
 

@@ -38,7 +38,8 @@
     "lodash": "4.17.15",
     "make-promises-safe": "5.1.0",
     "mongoose": "5.9.2",
-    "nanoid": "2.1.11"
+    "nanoid": "2.1.11",
+    "ws": "7.2.3"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
