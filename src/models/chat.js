@@ -12,6 +12,14 @@ const memberSchema = new mongoose.Schema({
     required: true
   },
   /**
+   * To avoid additional, excessive queries when
+   * list of chats are extracted
+   */
+  name: {
+    type: String,
+    required: true
+  },
+  /**
    * 0 - common member, 1 - owner
    * For a dialog does not need set status
    */

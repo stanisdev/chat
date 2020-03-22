@@ -31,16 +31,14 @@ class Chat {
             properties: {
               id: { type: 'string' },
               type: { type: 'number' },
+              name: { type: 'string' },
               last_message: {
                 type: 'object',
                 properties: {
                   content: { type: 'string' },
                   type: { type: 'string' },
                   author_name: { type: 'string' },
-                  created_at: {
-                    type: 'string',
-                    format: 'date'
-                  }
+                  created_at: { type: 'number' }
                 }
               }
             }
@@ -57,13 +55,20 @@ class Chat {
         if (Number.isInteger(query.page)) {
           page = query.page;
         }
-        let chats = await this.serviceChat.getMany(req.user._id, { limit, page });
-        const chatIds = [];
-        chats = chats.map(({ id, type }) => {
-          chatIds.push(id);
-          return { id, type };
+        const { chats, chatIds } = await this.serviceChat.getMany(req.user._id, { limit, page });
+
+        /**
+         * Get last message of each chat
+         */
+        let lastMessages = await this.db.Message.getLastMessages(chatIds);
+        lastMessages = lastMessages.map(message => {
+          message.created_at = new Date(message.created_at).getTime();
+          return message;
         });
-        const lastMessages = await this.db.Message.getLastMessages(chatIds);
+
+        /**
+         * Set last message to apropriate chat
+         */
         chats.forEach(chat => {
           const message = lastMessages.find(message => message.chat_id === chat.id);
           chat.last_message = message instanceof Object ? message : {};

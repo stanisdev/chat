@@ -46,8 +46,8 @@ class ChatService {
   /**
    * Get user's chats
    */
-  getMany(userId, { limit, page }) {
-    return this.db.Chat.findAndPaginate({
+  async getMany(userId, { limit, page }) {
+    let chats = await this.db.Chat.findAndPaginate({
       query: {
         'members.user_id': userId
       },
@@ -55,6 +55,23 @@ class ChatService {
       page,
       sort: { created_at: -1 }
     });
+    const chatIds = [];
+    chats = chats.map(({ _id: id, type, members }) => {
+      let chatName = 'Not specified';
+      if (type === 0) {
+        members.forEach(member => {
+          if (member instanceof Object && member.user_id !== userId) {
+            chatName = member.name;
+          }
+        });
+      }
+      else if (type === 1) {
+        chatName = `Group chat, ${members.length} members`;
+      }
+      chatIds.push(id);
+      return { id, type, name: chatName };
+    });
+    return { chats, chatIds };
   }
 }
 
