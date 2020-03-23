@@ -2,6 +2,7 @@
 
 const mongoose = require('mongoose');
 const nanoid = require('nanoid');
+const paginate = require('../plugins/mongoosePaginate');
 
 const messageSchema = new mongoose.Schema({
   _id: {
@@ -97,5 +98,6 @@ const staticMethods = {
 };
 
 messageSchema.statics = staticMethods;
+messageSchema.plugin(paginate);
 
 module.exports = mongoose.model('Message', messageSchema);

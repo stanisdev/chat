@@ -28,7 +28,13 @@ const config = {
   },
   chats: {
     limit: {
-      max: 50,
+      max: 20,
+      default: 10
+    },
+  },
+  messages: {
+    limit: {
+      max: 30,
       default: 10
     }
   },

@@ -46,7 +46,7 @@ class ChatService {
   /**
    * Get user's chats
    */
-  async getMany(userId, { limit, page }) {
+  async getMany({ userId, limit, page }) {
     let chats = await this.db.Chat.findAndPaginate({
       query: {
         'members.user_id': userId

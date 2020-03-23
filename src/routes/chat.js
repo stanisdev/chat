@@ -19,9 +19,14 @@ class Chat {
         limit: {
           type: 'integer',
           minimum: 1,
-          maximum: limitConfig.max
+          maximum: limitConfig.max,
+          default: limitConfig.default
         },
-        page: { type: 'integer', minimum: 0 }
+        page: {
+          type: 'integer',
+          minimum: 1,
+          default: 1
+        }
       },
       res: {
         chats: {
@@ -46,16 +51,13 @@ class Chat {
         }
       },
       async h(req) {
-        const { query } = req;
-        let limit = limitConfig.default;
-        let page = 1;
-        if (Number.isInteger(query.limit)) {
-          limit = query.limit;
-        }
-        if (Number.isInteger(query.page)) {
-          page = query.page;
-        }
-        const { chats, chatIds } = await this.serviceChat.getMany(req.user._id, { limit, page });
+        const { page, limit } = req.query;
+        const params = {
+          userId: req.user._id,
+          limit,
+          page
+        };
+        const { chats, chatIds } = await this.serviceChat.getMany(params);
 
         /**
          * Get last message of each chat
@@ -81,25 +83,60 @@ class Chat {
   /**
    * Messages of specific chat
    */
-  ['GET: /:id']() {
+  ['GET: /:chat_id']() {
+    const limitConfig = this.config.messages.limit;
     return {
-      description: 'Get list of messages of certain chat (@hint: this endpoint is not finished yet)',
+      auth: true,
+      filters: ['chat.isMember'],
+      description: 'Get list of messages of certain chat',
       params: {
-        id: { type: 'string', maxLength: 8 }
+        chat_id: { type: 'string', maxLength: 8 }
       },
       query: {
-        limit: { type: 'integer', minimum: 1 },
-        page: { type: 'integer', minimum: 0 },
-        Required: ['limit']
+        limit: {
+          type: 'integer',
+          minimum: 1,
+          maximum: limitConfig.max,
+          default: limitConfig.default
+        },
+        page: {
+          type: 'integer',
+          minimum: 0,
+          default: 0
+        }
       },
       res: {
         messages: {
           type: 'array',
-          items: { type: 'string' }
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string' },
+              content: { type: 'string' },
+              type: { type: 'string' },
+              is_read: { type: 'boolean' },
+              created_at: { type: 'number' },
+              author: {
+                type: 'object',
+                properties: {
+                  id: { type: 'string' },
+                  name: { type: 'string' },
+                  is_online: { type: 'boolean' }
+                }
+              }
+            }
+          }
         }
       },
       async h(req) {
-        return { ok: true, messages: ['one', 'two', 'three'] };
+        const { limit, page } = req.query;
+        const params = {
+          chatId: req.params.chat_id,
+          limit,
+          page
+        }
+        const messages = await this.serviceMessage.getMany(params);
+        return { ok: true, messages };
       }
     };
   }
