@@ -6,11 +6,11 @@ class Message {
   }
 
   /**
-   * Add new message
+   * Write new message
    */
   ['PUT: /:chat_id']() {
     return {
-      description: 'Adding new message to certain chat',
+      description: 'Writing new message to certain chat',
       auth: true,
       filters: ['chat.isMember'],
       body: {
@@ -41,6 +41,7 @@ class Message {
           body: req.body
         };
         const message = await this.serviceMessage.create(data);
+        this.serviceWebsocket.writeMessage({ ...data, ...{ message } });
         return { ok: true, message };
       }
     };

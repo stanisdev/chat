@@ -15,7 +15,7 @@ async function services(fastify, options) {
       Class.prototype.db = fastify.db;
       Class.prototype.Boom = fastify.Boom;
 
-      fastify.decorate('service' + _.capitalize(name), new Class());
+      fastify.decorate('service' + _.capitalize(name), new Class(fastify));
     });
 }
 
