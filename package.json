@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "local": "NODE_ENV=local PORT=4000 nodemon src/app.js",
+    "local": "NODE_ENV=local PORT=3001 nodemon src/app.js",
+    "local:mobile": "NODE_ENV=local HOST=\"192.168.1.105\" PORT=3001 nodemon src/app.js",
     "start": "NODE_ENV=production PORT=3000 node src/app.js"
   },
   "repository": {
@@ -30,9 +31,8 @@
   "dependencies": {
     "@hapi/boom": "9.0.0",
     "bcrypt": "4.0.1",
+    "cors": "2.8.5",
     "fastify": "2.12.1",
-    "fastify-cors": "3.0.2",
-    "fastify-formbody": "3.1.0",
     "fastify-jwt": "1.2.1",
     "fastify-plugin": "1.6.1",
     "fastify-swagger": "2.5.0",

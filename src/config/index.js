@@ -10,6 +10,7 @@ const config = {
   servicesDir: path.join(rootDir, 'services'),
   filtersDir: path.join(rootDir, 'filters'),
   port: env.PORT || 3000,
+  host: env.HOST || '127.0.0.1',
   mongo: {
     host: 'localhost',
     port: 27017,
