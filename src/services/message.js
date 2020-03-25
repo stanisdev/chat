@@ -35,7 +35,7 @@ class MessageService {
       },
       limit,
       page,
-      sort: { created_at: -1 }
+      sort: { created_at: 1 }
     });
     const authorsIds = new Set();
     messages = messages.map(m => {

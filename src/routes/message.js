@@ -28,9 +28,16 @@ class Message {
         message: {
           type: 'object',
           properties: {
-            author_id: { type: 'string' },
             content: { type: 'string' },
-            type: { type: 'string' }
+            type: { type: 'string' },
+            created_at: { type: 'number' },
+            author: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                name: { type: 'string' }
+              }
+            }
           }
         }
       },
@@ -41,7 +48,7 @@ class Message {
           body: req.body
         };
         const message = await this.serviceMessage.create(data);
-        this.serviceWebsocket.writeMessage({ ...data, ...{ message } });
+        // this.serviceWebsocket.writeMessage({ ...data, ...{ message } });
         return { ok: true, message };
       }
     };

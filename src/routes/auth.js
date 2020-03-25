@@ -46,12 +46,26 @@ class Auth {
         Required: ['email', 'password']
       },
       res: {
-        token: { type: 'string' }
+        token: { type: 'string' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' }
+          }
+        }
       },
       async h(req) {
         const userData = await this.serviceAuth.login(req.body);
         const token = await this.jwt.sign(userData);
-        return { ok: true, token };
+        return {
+          ok: true,
+          token,
+          user: {
+            id: userData._id,
+            name: userData.name
+          }
+        };
       }
     };
   }

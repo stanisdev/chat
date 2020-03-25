@@ -101,8 +101,8 @@ class Chat {
         },
         page: {
           type: 'integer',
-          minimum: 0,
-          default: 0
+          minimum: 1,
+          default: 1
         }
       },
       res: {
