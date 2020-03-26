@@ -18,11 +18,27 @@ class WebSocket {
   }
 
   /**
-   * Write new message in a chat
+   * Writing new message in chat
    */
-  writeMessage({ chat, userId, message }) {
-    const payload = {};
-    this.clients[userId].send(payload);
+  writeMessage({
+    message: { content, type, chat_id: chatId },
+    receivers,
+    author
+  }) {
+    const payload = JSON.stringify({
+      chat_id: chatId,
+      content,
+      type,
+      author: {
+        id: author._id,
+        name: author.name
+      }
+    });
+    receivers.forEach(userId => {
+      if (this.clients.hasOwnProperty(userId)) {
+        this.clients[userId].send(payload);
+      }
+    });
   }
 
   /**

@@ -42,13 +42,21 @@ class Message {
         }
       },
       async h(req) {
-        const data = {
-          chat: req.chat,
-          userId: req.user._id,
-          body: req.body
-        };
+        const { chat, body, user } = req;
+        const userId = user._id;
+        const data = { userId, chat, body };
         const message = await this.serviceMessage.create(data);
-        // this.serviceWebsocket.writeMessage({ ...data, ...{ message } });
+
+        const receivers = chat.members
+          .filter(m => m.user_id !== userId)
+          .map(m => m.user_id);
+
+        const socketData = {
+          message,
+          receivers,
+          author: user
+        };
+        this.serviceWebsocket.writeMessage(socketData);
         return { ok: true, message };
       }
     };
