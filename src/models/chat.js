@@ -65,6 +65,11 @@ const staticMethods = {
       type: 0,
       $and: members
     });
+  },
+  findAllByMemberId(userId) {
+    return this.find({
+      'members.user_id': userId
+    }, '_id');
   }
 };
 

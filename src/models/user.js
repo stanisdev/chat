@@ -63,6 +63,11 @@ const staticMethods = {
       return { _id: id };
     });
     return this.count({ $or: ids });
+  },
+  findByManyId(ids) {
+    return this.find({
+      _id: { $in: ids }
+    }, '_id name');
   }
 };
 

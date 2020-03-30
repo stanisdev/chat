@@ -19,7 +19,8 @@ const messageSchema = new mongoose.Schema({
   chat_id: {
     type: String,
     ref: 'Chat',
-    required: true
+    required: true,
+    // index: true // @todo: uncomment this
   },
   content: {
     type: String,
@@ -39,7 +40,8 @@ const messageSchema = new mongoose.Schema({
     recipient_id: {
       type: 'String',
       ref: 'User',
-      required: true
+      required: true,
+      // index: true // @todo: uncomment this
     },
     /**
      * Value of message status belonging specific user
@@ -62,38 +64,62 @@ const messageSchema = new mongoose.Schema({
 });
 
 const staticMethods = {
-  getLastMessages(chatIds) {
+  getLastMessages({ userId, allChatsIds, limit, page }) {
+    const skip = limit * (page - 1);
+
     return this.aggregate([
       { $match: {
-          chat_id: { $in: chatIds }
+          'statuses.recipient_id': userId,
+          chat_id: { $in: allChatsIds }
         }
       },
       { $sort: { created_at: -1 } },
       { $group: {
           _id: '$chat_id',
-          author_id: { $first: '$author_id' },
           content: { $first: '$content' },
           type: { $first: '$type' },
+          author_id: { $first: '$author_id' },
           chat_id: { $first: '$chat_id' },
+          created_at: { $first: '$created_at' },
+          statuses: { $first: '$statuses' }
         }
       },
+      { $sort: { created_at: -1 } },
       { $lookup: {
           from: 'users',
           localField: 'author_id',
           foreignField: '_id',
-          as: 'users'
+          as: 'author'
         }
       },
-      { $project: {
-          _id: 0,
-          content: 1,
-          type: 1,
-          chat_id: 1,
-          'author_name': { $arrayElemAt: [ "$users.name", 0 ] },
-          'created_at':  { $arrayElemAt: [ "$users.created_at", 0 ] }
+      { $lookup: {
+          from: 'chats',
+          localField: 'chat_id',
+          foreignField: '_id',
+          as: 'chat'
         }
-      }
+      },
+      { $skip: skip },
+      { $limit: limit }
     ]);
+  },
+
+  async countUnread(chatsIds, userId) {
+    const tasks = chatsIds.map(chatId => {
+      return this.countDocuments({
+        chat_id: chatId,
+        statuses: {
+          $elemMatch: {
+            recipient_id: userId,
+            value: 0
+          }
+        }
+      });
+    });
+    const data = await Promise.all(tasks);
+    return data.map((count, index) => {
+      return { count, chatId: chatsIds[index] };
+    });
   }
 };
 
