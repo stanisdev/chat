@@ -61,10 +61,10 @@ class Chat {
          * The parameter "allChatsIds" is used to avoid displaying
          * a chat where user wrote the message(s) and later left the chat.
          */
-        const allChats = await this.db.Chat.findAllByMemberId(userId);
+        const allChatsIds = await this.db.Chat.findAllByMemberId(userId);
         const lastMessages = await this.db.Message.getLastMessages({
           userId,
-          allChatsIds: allChats.map(c => c._id),
+          allChatsIds: allChatsIds.map(c => c._id),
           limit,
           page
         });
@@ -156,7 +156,6 @@ class Chat {
               id: { type: 'string' },
               content: { type: 'string' },
               type: { type: 'string' },
-              is_read: { type: 'boolean' },
               created_at: { type: 'number' },
               author: {
                 type: 'object',

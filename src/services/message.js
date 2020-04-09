@@ -18,8 +18,8 @@ class MessageService {
     const message = new this.db.Message({
       author_id: userId,
       chat_id: chat._id,
-      content: content,
-      type: type,
+      content,
+      type,
       statuses
     });
     return message.save();
@@ -45,7 +45,6 @@ class MessageService {
         id: m._id,
         content: m.content,
         type: m.type,
-        is_read: m.is_read,
         created_at: new Date(m.created_at).getTime(),
         author_id: m.author_id
       };

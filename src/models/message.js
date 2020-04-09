@@ -31,10 +31,6 @@ const messageSchema = new mongoose.Schema({
     enum: ['text/plain', 'image/jpeg'],
     required: true
   },
-  is_read: {
-    type: Boolean,
-    default: false
-  },
   statuses: [{
     _id: false,
     recipient_id: {

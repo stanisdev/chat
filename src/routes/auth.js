@@ -56,6 +56,9 @@ class Auth {
         }
       },
       async h(req) {
+        /**
+         * Add limit to attempting of login (based on Redis)
+         */
         const userData = await this.serviceAuth.login(req.body);
         const token = await this.jwt.sign(userData);
         return {

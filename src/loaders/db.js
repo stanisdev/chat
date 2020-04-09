@@ -11,12 +11,13 @@ async function db(fastify, opts) {
     await mongoose.connect(`mongodb://${host}:${port}/${db}`, options); // @todo: add user/password
   } catch (err) {
     fastify.log.error(err);
+    process.exit(1);
   }
   mongoose.set('debug', true);
   const models = {};
 
   glob
-    .sync(fastify.config.rootDir + '/models/*.js')
+    .sync(fastify.config.modelsDir + '/*.js')
     .forEach(filePath => {
       const fileName = path.basename(filePath).slice(0, -3);
       const modelName = fileName.slice(0, 1).toUpperCase() + fileName.slice(1);

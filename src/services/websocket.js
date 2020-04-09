@@ -61,7 +61,7 @@ class WebSocket {
    */
   verifyClient({ req }, next) {
     const { url } = req;
-    const token = url.split('?token=')[1];
+    const [, token] = url.split('?token=');
 
     promisify(this.jwt.verify)(token, this.config.jwt.secret)
       .then(decoded => {
