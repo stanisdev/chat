@@ -14,6 +14,7 @@ async function filters(fastify, options) {
       const Class = require(file);
       Class.prototype.db = db;
       Class.prototype.Boom = fastify.Boom;
+      Class.prototype.config = fastify.config;
       filters[name] = new Class();
     });
 

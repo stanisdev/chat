@@ -116,6 +116,21 @@ const staticMethods = {
     return data.map((count, index) => {
       return { count, chatId: chatsIds[index] };
     });
+  },
+
+  findByStatuses({ ids, chatId, userId }) {
+    return this.find({
+      _id: {
+        $in: ids
+      },
+      chat_id: chatId,
+      statuses: {
+        $elemMatch: {
+          recipient_id: userId,
+          value: 0
+        }
+      }
+    });
   }
 };
 

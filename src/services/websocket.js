@@ -42,6 +42,18 @@ class WebSocket {
   }
 
   /**
+   * Send the message to all clients iteratively
+   */
+  sendAll(receivers, payload) {
+    payload = JSON.stringify(payload);
+    receivers.forEach(userId => {
+      if (this.clients.hasOwnProperty(userId)) {
+        this.clients[userId].send(payload);
+      }
+    });
+  }
+
+  /**
    * Awaiting connection of a client
    */
   start() {

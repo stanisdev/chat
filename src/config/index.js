@@ -38,7 +38,11 @@ const config = {
     limit: {
       max: 30,
       default: 10
-    }
+    },
+    /**
+     * Maximum amount of statuses to be updated
+     */
+    maxStatusesToBeUpdated: 20
   },
   websocket: {
     port: 8080,
