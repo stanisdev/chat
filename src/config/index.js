@@ -21,6 +21,16 @@ const config = {
       useUnifiedTopology: true
     }
   },
+  websocket: {
+    port: 8080,
+    maxPayload: 1048576
+  },
+  redis: {
+    port: 6379,
+    host: '127.0.0.1',
+    db: 0,
+    password: null
+  },
   server: {
     ignoreTrailingSlash: true,
     logger: true
@@ -44,9 +54,9 @@ const config = {
      */
     maxStatusesToBeUpdated: 20
   },
-  websocket: {
-    port: 8080,
-    maxPayload: 1048576
+  auth: {
+    maxAttemptsToLogin: 4,
+    blockedUserTtl: 60 * 60 // being measured in seconds
   }
 };
 

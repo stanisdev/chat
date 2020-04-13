@@ -20,13 +20,25 @@ class AuthService {
     await user.save();
   }
 
-  async login({ email, password }) {
+  async login({
+    body: { email, password },
+    loginAttempts
+  }) {
     const user = await this.db.User.findOne({ email });
-    if (!(user instanceof Object)) {
-      throw this.Boom.badRequest(this.wrongCredentials);
-    }
-    const isValid = await user.checkPassword(password);
-    if (!isValid) {
+    try {
+      if (!(user instanceof Object)) {
+        throw new Error();
+      }
+      const isValid = await user.checkPassword(password);
+      if (!isValid) {
+        throw new Error();
+      }
+    } catch {
+      /**
+       * Increase counter of attempts in redis
+       */
+      const counter = Number.isInteger(loginAttempts) ? loginAttempts + 1 : 1;
+      await this.redis.set(`e:${email}`, counter, 'EX', this.config.auth.blockedUserTtl);
       throw this.Boom.badRequest(this.wrongCredentials);
     }
     return pick(user, ['_id', 'name']);

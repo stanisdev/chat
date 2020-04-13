@@ -9,6 +9,7 @@ fastify.register(require('fastify-formbody'));
 fastify.use(cors());
 fastify.decorate('config', config);
 fastify.register(require('./db'));
+fastify.register(require('./redis'));
 fastify.register(require('./boom'));
 fastify.register(require('./errors'));
 fastify.register(require('./jwt'));

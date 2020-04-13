@@ -14,6 +14,8 @@ async function services(fastify, options) {
       const name = path.basename(file).slice(0, -3);
       Class.prototype.db = fastify.db;
       Class.prototype.Boom = fastify.Boom;
+      Class.prototype.redis = fastify.redis;
+      Class.prototype.config = fastify.config;
 
       fastify.decorate('service' + _.capitalize(name), new Class(fastify));
     });

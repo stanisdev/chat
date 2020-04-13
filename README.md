@@ -1,2 +1,2 @@
 # chat
-API of real-time chat based on Node.js, MongoDB, WebSocket
+API of real-time chat based on Node.js, MongoDB, Redis, WebSocket

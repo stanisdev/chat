@@ -35,6 +35,7 @@ class Auth {
   ['POST: /login']() {
     return {
       description: 'Login a user and return JWT token',
+      filters: ['restriction.maxAttemptsToLogin'],
       body: {
         email: {
           type: 'string',
@@ -56,10 +57,7 @@ class Auth {
         }
       },
       async h(req) {
-        /**
-         * Add limit to attempting of login (based on Redis)
-         */
-        const userData = await this.serviceAuth.login(req.body);
+        const userData = await this.serviceAuth.login(req);
         const token = await this.jwt.sign(userData);
         return {
           ok: true,

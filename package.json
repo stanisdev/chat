@@ -38,6 +38,7 @@
     "fastify-plugin": "1.6.1",
     "fastify-swagger": "2.5.0",
     "glob": "7.1.6",
+    "ioredis": "4.16.2",
     "lodash": "4.17.15",
     "make-promises-safe": "5.1.0",
     "mongoose": "5.9.2",

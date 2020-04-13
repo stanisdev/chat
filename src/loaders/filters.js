@@ -15,6 +15,7 @@ async function filters(fastify, options) {
       Class.prototype.db = db;
       Class.prototype.Boom = fastify.Boom;
       Class.prototype.config = fastify.config;
+      Class.prototype.redis = fastify.redis;
       filters[name] = new Class();
     });
 
