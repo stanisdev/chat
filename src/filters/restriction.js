@@ -21,7 +21,7 @@ class RestrictionFilter {
       return;
     }
     if (count > limit) {
-      throw this.Boom.badRequest('You have exceeded maximum allowable count of attempts to login');
+      throw this.Boom.forbidden('You have exceeded maximum allowable count of attempts to login');
     }
     req.loginAttempts = count;
   }

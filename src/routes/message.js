@@ -89,9 +89,7 @@ class Message {
           });
         }
         await this.serviceMessage.updateStatuses(messages, userId);
-        const receiversIds = req.chat.members
-          .filter(m => m.user_id !== userId)
-          .map(m => m.user_id);
+        const receiversIds = req.chat.getOtherMembers(userId);
 
         const payload = {
           chat_id: req.chat._id,
@@ -99,6 +97,42 @@ class Message {
           ids: req.params.ids
         };
         this.serviceWebsocket.sendAll(receiversIds, payload);
+        return { ok: true };
+      }
+    };
+  }
+
+  /**
+   * Delete messages
+   */
+  ['DELETE: /:chat_id/:ids']() {
+    return {
+      description: 'Deleting a message',
+      auth: true,
+      filters: ['chat.isMember'],
+      async h(req) {
+        let { ids, chat_id: chatId } = req.params;
+        try {
+          ids = ids.split(',');
+          const params = {
+            ids,
+            chatId,
+            userId: req.user._id
+          };
+          await this.serviceMessage.deleteMany(params);
+        } catch {
+          throw this.Boom.badRequest({
+            ids: 'List of ids is incorrect'
+          });
+        }
+        await this.serviceMessage.deleteWithEmptyStatuses(ids);
+        const receivers = req.chat.getOtherMembers(req.user._id);
+        const payload = {
+          chat_id: chatId,
+          event: 'delete/message',
+          ids
+        };
+        this.serviceWebsocket.sendAll(receivers, payload);
         return { ok: true };
       }
     };

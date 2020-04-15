@@ -56,6 +56,14 @@ const chatSchema = new mongoose.Schema({
   }
 });
 
+const instanceMethods = {
+  getOtherMembers(userId) {
+    return this.members
+      .filter(m => m.user_id !== userId)
+      .map(m => m.user_id);
+  }
+};
+
 const staticMethods = {
   findDialog(members) {
     members = members.map(member => {
@@ -74,6 +82,7 @@ const staticMethods = {
 };
 
 chatSchema.statics = staticMethods;
+chatSchema.methods = instanceMethods;
 chatSchema.plugin(paginate);
 
 module.exports = mongoose.model('Chat', chatSchema);
