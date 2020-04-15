@@ -7,6 +7,9 @@ class Chat {
     this.prefix = '/chat';
   }
 
+  /**
+   * Get user's chats
+   */
   ['GET: /']() {
     const limitConfig = this.config.chats.limit;
     return {
@@ -220,9 +223,23 @@ class Chat {
   }
 
   /**
-   * Delete chat
+   * Leave/delete chat
    */
-  ['DELETE: /:id']() {}
+  ['DELETE: /:chat_id']() {
+    return {
+      description: 'User wants to leave a chat',
+      auth: true,
+      filters: ['chat.isMember'],
+      async h(req) {
+        const params = {
+          userId: req.user._id,
+          chat: req.chat
+        };
+        await this.serviceChat.leaveChat(params);
+        return { ok: true };
+      }
+    };
+  }
 }
 
 module.exports = Chat;

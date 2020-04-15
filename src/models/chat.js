@@ -74,10 +74,18 @@ const staticMethods = {
       $and: members
     });
   },
+
   findAllByMemberId(userId) {
     return this.find({
       'members.user_id': userId
     }, '_id');
+  },
+
+  removeOneById(id) {
+    return this.remove(
+      { _id: id },
+      { justOne: true }
+    );
   }
 };
 
