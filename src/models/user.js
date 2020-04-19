@@ -62,7 +62,7 @@ const staticMethods = {
     ids = ids.map(id => {
       return { _id: id };
     });
-    return this.count({ $or: ids });
+    return this.countDocuments({ $or: ids });
   },
   findByManyId(ids) {
     return this.find({

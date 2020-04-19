@@ -32,8 +32,7 @@ const memberSchema = new mongoose.Schema({
    * So first user should be related to the chat until interlocutor to be blocked.
    */
   is_deleted: {
-    type: Boolean,
-    default: false
+    type: Boolean
   }
 });
 
@@ -86,6 +85,21 @@ const staticMethods = {
       { _id: id },
       { justOne: true }
     );
+  },
+
+  addMember({ member, chat }) {
+    return this.update(
+      { _id: chat._id },
+      {
+        $push: {
+          members: {
+            user_id: member._id,
+            name: member.name,
+            status: 0
+          }
+        }
+      }
+    )
   }
 };
 

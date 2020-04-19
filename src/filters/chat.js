@@ -11,6 +11,12 @@ class ChatFilter {
     }
     req.chat = chat;
   }
+  async isAdmin(req) {
+    const member = req.chat.members.find(m => m.user_id === req.user._id);
+    if (!(member instanceof Object) || member.status !== 1) {
+      throw this.Boom.forbidden('It is disallow to add a new member');
+    }
+  }
 }
 
 module.exports = ChatFilter;

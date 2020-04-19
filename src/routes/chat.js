@@ -247,6 +247,37 @@ class Chat {
       }
     };
   }
+
+
+  /**
+   * Add new user to a chat
+   */
+  ['PUT: /:chat_id/add_member/:user_id']() {
+    return {
+      description: 'Add new member to a chat',
+      auth: true,
+      filters: ['chat.isMember', 'chat.isAdmin'],
+      async h(req) {
+        const { chat } = req;
+        if (chat.type !== 1) {
+          throw this.Boom.forbidden(`It's disallow to add new member to not a group chat`);
+        }
+        const { user_id: memberId } = req.params;
+        /**
+         * Check whether user already in chat
+         */
+        if (chat.members.find(m => m.user_id === memberId) instanceof Object) {
+          throw this.Boom.badRequest('User already is in the chat');
+        }
+        const member = await this.db.User.findOne({ _id: memberId });
+        if (!(member instanceof Object)) {
+          throw this.Boom.badRequest('User does not exist');
+        }
+        await this.db.Chat.addMember({ member, chat });
+        return { ok: true };
+      }
+    };
+  }
 }
 
 module.exports = Chat;
