@@ -200,6 +200,9 @@ class Chat {
         members: {
           type: 'array',
           minItems: 1,
+          /**
+           * @todo: Add limit to count of allowable members
+           */
           items: { type: 'string' }
         },
         Required: ['type', 'members']
@@ -213,7 +216,8 @@ class Chat {
         }
       },
       async h(req) {
-        const chat = await this.serviceChat.create(req.user, req.body);
+        const params = { ...req.body, ...{ userId: req.user._id } };
+        const chat = await this.serviceChat.create(params);
         return {
           ok: true,
           chat: pick(chat, ['id'])
@@ -235,6 +239,9 @@ class Chat {
           userId: req.user._id,
           chat: req.chat
         };
+        /**
+         * @todo: Add condition, if chat has been removed then remove all related messages
+         */
         await this.serviceChat.leaveChat(params);
         return { ok: true };
       }

@@ -6,37 +6,47 @@ class ChatService {
   /**
    * Create chat
    */
-  async create(userId, { type, members }) {
-    members.push(userId);
+  async create({ type, members, userId }) {
+    const { Chat, User } = this.db;
+    members = [... new Set(members)].filter(id => id !== userId);
 
     /**
-     * Check chat's existence
+     * Check dialog existence
      */
-    const { Chat, User } = this.db;
-    const chat = await Chat.findDialog(members);
-    if (chat instanceof Object) {
-      return chat;
+    if (type === 0) {
+      if (members.length !== 1) {
+        throw this.Boom.badRequest({ members: 'Count of members has to be equal 1' });
+      }
+      const chat = await Chat.findDialog(members);
+      if (chat instanceof Object) {
+        return chat;
+      }
     }
+    members.push(userId);
     /**
      * Check ids of members
      */
-    const count = await User.countByIds(members);
-    if (count !== members.length) {
+    const users = await User.find({
+      _id: { $in: members }
+    });
+    if (users.length !== members.length) {
       throw this.Boom.badRequest({ members: 'Wrong list of id of members' });
     }
     /**
      * Create new one
      */
     members = members.map(memberId => {
-      const result = { user_id: memberId };
+      const user = users.find(u => u._id === memberId);
+      const result = {
+        user_id: memberId,
+        name: user.name
+      };
+
       if (type === 0) {
+        result.is_deleted = false;
         return result;
       }
-      if (memberId === userId) {
-        result.status = 1;
-      } else {
-        result.status = 0;
-      }
+      result.status = memberId === userId ? 1 : 0;
       return result;
     });
     const newChat = new Chat({ type, members });
