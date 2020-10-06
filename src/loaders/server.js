@@ -6,7 +6,7 @@ const fastify = require('fastify')(config.server);
 const { pick } = require('lodash');
 
 fastify.register(require('fastify-formbody'));
-fastify.use(cors());
+// fastify.use(cors());
 fastify.decorate('config', config);
 fastify.register(require('./db'));
 fastify.register(require('./redis'));

@@ -1,7 +1,8 @@
 'use string'
 
 const mongoose = require('mongoose');
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
+const { nanoid: nanoidAsync } = require('nanoid/async');
 const bcrypt = require('bcrypt');
 
 const userSchema = new mongoose.Schema({
@@ -47,7 +48,7 @@ const userSchema = new mongoose.Schema({
 
 const instanceMethods = {
   async cryptPassword() {
-    const salt = nanoid(6);
+    const salt = await nanoidAsync(6);
     this.salt = salt;
     this.password = await bcrypt.hash(this.password + salt, 10);
   },
