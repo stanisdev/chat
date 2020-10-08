@@ -1,6 +1,6 @@
 'use string'
 
-const cors = require('cors');
+// const cors = require('cors');
 const config = require('../config');
 const fastify = require('fastify')(config.server);
 const { pick } = require('lodash');
@@ -19,11 +19,14 @@ fastify.register(require('./swagger'));
 fastify.register(require('./websocket'));
 fastify.register(require('./routes'));
 
-(async () => {
+const start = async () => {
   try {
     await fastify.listen(pick(config, ['port', 'host']));
+    return fastify.server;
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-})();
+};
+
+module.exports = start;

@@ -1,4 +1,4 @@
 'use string'
 
 require('make-promises-safe');
-require('./loaders/server');
+module.exports = require('./loaders/server')();

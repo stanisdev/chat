@@ -4,6 +4,7 @@ const fp = require('fastify-plugin');
 const mongoose = require('mongoose');
 const glob = require('glob');
 const path = require('path');
+const fs = require('fs');
 
 async function db(fastify, opts) {
   const { host, port, db, options } = fastify.config.mongo;
@@ -13,7 +14,9 @@ async function db(fastify, opts) {
     fastify.log.error(err);
     process.exit(1);
   }
-  mongoose.set('debug', true);
+  if (fastify.config.logging) {
+    mongoose.set('debug', true);
+  }
   const models = {};
 
   glob

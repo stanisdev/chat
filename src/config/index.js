@@ -2,7 +2,39 @@
 
 const path = require('path');
 const rootDir = path.dirname(__dirname);
-const { env } = process;
+const env = process.env.NODE_ENV || 'development';
+const { merge } = require('lodash');
+const logging = env !== 'test';
+
+const environments = {
+  test: {
+    port: 3002,
+    redis: {
+      db: 2
+    },
+    mongo: {
+      db: 'chat_test'
+    }
+  },
+  development: {
+    port: 3001,
+    redis: {
+      db: 1
+    },
+    mongo: {
+      db: 'chat_dev'
+    }
+  },
+  production: {
+    port: 3000,
+    redis: {
+      db: 0
+    },
+    mongo: {
+      db: 'chat'
+    }
+  }
+};
 
 const config = {
   rootDir,
@@ -10,8 +42,8 @@ const config = {
   servicesDir: path.join(rootDir, 'services'),
   filtersDir: path.join(rootDir, 'filters'),
   modelsDir: path.join(rootDir, 'models'),
-  port: env.PORT || 3000,
-  host: env.HOST || '127.0.0.1',
+  host: process.env.HOST || '127.0.0.1',
+  logging,
   mongo: {
     host: 'localhost',
     port: 27017,
@@ -33,10 +65,10 @@ const config = {
   },
   server: {
     ignoreTrailingSlash: true,
-    logger: true
+    logger: logging
   },
   jwt: {
-    secret: env.JWT_SECRET || 'k6b8JHnLCrH4dE6nkxprYLF49'
+    secret: process.env.JWT_SECRET || 'k6b8JHnLCrH4dE6nkxprYLF49'
   },
   chats: {
     limit: {
@@ -60,4 +92,4 @@ const config = {
   }
 };
 
-module.exports = config;
+module.exports = merge(config, environments[env]);

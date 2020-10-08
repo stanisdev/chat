@@ -1,6 +1,7 @@
 'use string'
 
 const { pick } = require('lodash');
+const { strictEqual } = require('assert').strict;
 
 class AuthService {
   constructor() {
@@ -26,13 +27,8 @@ class AuthService {
   }) {
     const user = await this.db.User.findOne({ email });
     try {
-      if (!(user instanceof Object)) {
-        throw new Error();
-      }
-      const isValid = await user.checkPassword(password);
-      if (!isValid) {
-        throw new Error();
-      }
+      strictEqual(user instanceof Object, true);
+      strictEqual(await user.checkPassword(password), true);
     } catch {
       /**
        * Increase counter of attempts in redis

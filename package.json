@@ -4,10 +4,10 @@
   "description": "API of real-time chat based on Node.js, MongoDB, WebSocket, Redis",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "local": "NODE_ENV=local PORT=3001 nodemon src/app.js",
-    "local:mobile": "NODE_ENV=local HOST=\"192.168.1.105\" PORT=3001 nodemon src/app.js",
-    "start": "NODE_ENV=production PORT=3000 node src/app.js"
+    "test": "jest",
+    "dev": "NODE_ENV=development nodemon src/app.js",
+    "dev:mobile": "NODE_ENV=development HOST=\"192.168.1.105\" PORT=3001 nodemon src/app.js",
+    "start": "NODE_ENV=production node src/app.js"
   },
   "repository": {
     "type": "git",
@@ -53,6 +53,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "jest": "^26.5.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "supertest": "^5.0.0"
   }
 }

@@ -13,21 +13,20 @@ class Routes {
   }
 
   build() {
-    this.scanFiles();
-    this.files.forEach(file => {
-      const Class = require(file);
-      const instance = new Class();
-      Class.prototype.config = this.fastify.config;
-      this.iterateClassMethods(Class, instance);
-    });
+    glob
+      .sync(this.fastify.config.routesDir + '/*.js')
+      .forEach(file => {
+        const Class = require(file);
+        const instance = new Class();
+        Class.prototype.config = this.fastify.config;
+        this.#iterateClassMethods(Class, instance);
+      });
   }
 
-  iterateClassMethods(Class, instance) {
+  #iterateClassMethods(Class, instance) {
     Object
       .getOwnPropertyNames(Class.prototype)
-      .filter(methodName => {
-        return !['constructor', 'config'].includes(methodName);
-      })
+      .filter(methodName => !['constructor', 'config'].includes(methodName))
       .forEach(routeParams => {
 
         const { prefix } = instance;
@@ -47,20 +46,20 @@ class Routes {
         const { params, query, body, res, auth, filters, description } = essential;
 
         if (params instanceof Object) {
-          schema.params = this.getBlankValidator(params);
+          schema.params = this.#getBlankValidator(params);
         }
         if (query instanceof Object) {
-          schema.querystring = this.getBlankValidator(query);
-          this.setRequired(schema.querystring);
+          schema.querystring = this.#getBlankValidator(query);
+          this.#setRequired(schema.querystring);
         }
         if (body instanceof Object) {
-          schema.body = this.getBlankValidator(body);
-          this.setRequired(schema.body);
+          schema.body = this.#getBlankValidator(body);
+          this.#setRequired(schema.body);
         }
         if (typeof description === 'string') {
           schema.description = description;
         }
-        this.setResponse(schema, res);
+        this.#setResponse(schema, res);
 
         const result = {
           method: httpMethod,
@@ -72,13 +71,13 @@ class Routes {
           result.preValidation = [this.fastify.authenticate];
         }
         if (Array.isArray(filters)) {
-          this.setFilters(filters, result);
+          this.#setFilters(filters, result);
         }
         this.fastify.route(result);
       });
   }
 
-  setFilters(filters, result) {
+  #setFilters(filters, result) {
     filters.forEach(filter => {
       const [ className, methodName ] = filter.split('.');
       const filterFunction = this.fastify.filters[className][methodName];
@@ -91,14 +90,14 @@ class Routes {
     });
   }
 
-  getBlankValidator(properties) {
+  #getBlankValidator(properties) {
     return {
       type: 'object',
       properties
     };
   }
 
-  setRequired(object) {
+  #setRequired(object) {
     const { properties } = object;
     if (properties.hasOwnProperty('Required')) {
       const required = properties.Required;
@@ -107,7 +106,7 @@ class Routes {
     }
   }
 
-  setResponse(schema, res) {
+  #setResponse(schema, res) {
     let properties = {
       ok: { type: 'boolean' }
     };
@@ -141,9 +140,5 @@ class Routes {
         }
       }
     };
-  }
-
-  scanFiles() {
-    this.files = glob.sync(this.fastify.config.routesDir + '/*.js');
   }
 }
