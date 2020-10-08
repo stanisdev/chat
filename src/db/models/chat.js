@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const nanoid = require('nanoid');
-const paginate = require('../plugins/mongoosePaginate');
+const paginate = require('../../plugins/mongoosePaginate');
 
 const memberSchema = new mongoose.Schema({
   _id: false,

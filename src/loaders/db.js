@@ -1,32 +1,19 @@
 'use string'
 
 const fp = require('fastify-plugin');
-const mongoose = require('mongoose');
-const glob = require('glob');
-const path = require('path');
-const fs = require('fs');
+const { join } = require('path');
 
 async function db(fastify, opts) {
-  const { host, port, db, options } = fastify.config.mongo;
+  const Db = require(join(fastify.config.dbDirs.scripts, 'db'));
+  const db = new Db(fastify.config);
+
   try {
-    await mongoose.connect(`mongodb://${host}:${port}/${db}`, options); // @todo: add user/password
+    await db.connect();
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-  if (fastify.config.logging) {
-    mongoose.set('debug', true);
-  }
-  const models = {};
-
-  glob
-    .sync(fastify.config.modelsDir + '/*.js')
-    .forEach(filePath => {
-      const fileName = path.basename(filePath).slice(0, -3);
-      const modelName = fileName.slice(0, 1).toUpperCase() + fileName.slice(1);
-      models[modelName] = require(filePath);
-    });
-  fastify.decorate('db', models);
+  fastify.decorate('db', db.getModels());
 }
 
 module.exports = fp(db);

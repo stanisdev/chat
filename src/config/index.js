@@ -1,7 +1,7 @@
 'use string'
 
-const path = require('path');
-const rootDir = path.dirname(__dirname);
+const { dirname, join } = require('path');
+const rootDir = dirname(__dirname);
 const env = process.env.NODE_ENV || 'development';
 const { merge } = require('lodash');
 const logging = env !== 'test';
@@ -38,11 +38,15 @@ const environments = {
 
 const config = {
   rootDir,
-  routesDir: path.join(rootDir, 'routes'),
-  servicesDir: path.join(rootDir, 'services'),
-  filtersDir: path.join(rootDir, 'filters'),
-  modelsDir: path.join(rootDir, 'models'),
+  routesDir: join(rootDir, 'routes'),
+  servicesDir: join(rootDir, 'services'),
+  filtersDir: join(rootDir, 'filters'),
   host: process.env.HOST || '127.0.0.1',
+  dbDirs: {
+    models: join(rootDir, 'db', 'models'),
+    scripts: join(rootDir, 'db', 'scripts'),
+    seeders: join(rootDir, 'db', 'seeders'),
+  },
   logging,
   mongo: {
     host: 'localhost',
