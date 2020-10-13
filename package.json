@@ -39,6 +39,7 @@
     "fastify-plugin": "2.3.4",
     "fastify-swagger": "3.4.0",
     "glob": "^7.1.6",
+    "http-status": "1.4.2",
     "ioredis": "4.17.3",
     "lodash": "4.17.20",
     "make-promises-safe": "^5.1.0",
