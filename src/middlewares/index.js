@@ -33,15 +33,16 @@ const middlewares = {
    * Check whether a user has made too many attempts to login
    */
   async maxAttemptsToLogin(req) {
-    const { email } = req.body;
     const limit = this.config.auth.maxAttemptsToLogin - 1;
-    let count = await this.redis.get(`e:${email}`);
+    let count = await this.redis.get(`e:${req.body.email}`);
     count = parseInt(count);
     if (!Number.isInteger(count)) {
       return;
     }
     if (count > limit) {
-      throw this.Boom.forbidden('You have exceeded maximum allowable count of attempts to login');
+      throw this.Boom.forbidden({
+        email: 'You have exceeded the maximum allowable count of attempts to login'
+      });
     }
     req.loginAttempts = count;
   },
