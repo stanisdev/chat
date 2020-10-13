@@ -13,6 +13,7 @@ class Chat {
   async ['GET / | auth'](req) {
     const { limit, page } = req.query;
     const userId = req.user._id;
+
     /**
      * The parameter "allChatsIds" is used to avoid displaying
      * a chat where user wrote the message(s) and later left the chat.
@@ -122,13 +123,15 @@ class Chat {
   /**
    * Add new user to a chat
    * @todo: define schema
+   * @todo: add localization for the error messages
    */
-  async ['PUT /:chat_id/add_member/:user_id | auth, isChatMember, isChatAdmin'](req) {
-    const { chat } = req;
+  async ['PUT /:chat_id/add_member/:user_id | auth, isChatMember, isChatAdmin']({
+    chat, params
+  }) {
     if (chat.type !== 1) {
       throw this.Boom.forbidden(`It's disallow to add new member to not a group chat`);
     }
-    const { user_id: memberId } = req.params;
+    const { user_id: memberId } = params;
     /**
      * Check whether user already in chat
      */

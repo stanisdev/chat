@@ -1,11 +1,21 @@
 'use strict';
 
+const { strictEqual: equal } = require('assert').strict;
+
 const middlewares = {
   /**
-   * @todo: Define the method
+   * Decrypt JWT and check user existence
    */
-  async auth() {
-    
+  async auth(req) {
+    try {
+      await req.jwtVerify();
+      const user = await this.db.User.findOne({
+        _id: req.user._id
+      }, '_id email name');
+      equal(user instanceof Object, true);
+    } catch {
+      throw this.Boom.unauthorized('Private area. You have to be authorized');
+    }
   },
   /**
    * Check whether a user is member of a chat

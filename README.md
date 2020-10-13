@@ -1,2 +1,8 @@
 # chat
-API of real-time chat based on Node.js, MongoDB, Redis, WebSocket
+The API of chat application.
+
+Used technologies:
+- Node 14.9.0
+- MongoDB 4.4.0
+- Redis
+- WebSocket
