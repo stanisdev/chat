@@ -1,144 +1,82 @@
-'use string'
+'use strict';
 
 const fp = require('fastify-plugin');
+const { join } = require('path');
 const glob = require('glob');
-
-module.exports = fp(async function(fastify, options) {
-  new Routes(fastify).build();
-});
 
 class Routes {
   constructor(fastify) {
     this.fastify = fastify;
   }
 
-  build() {
-    glob
-      .sync(this.fastify.config.routesDir + '/*.js')
-      .forEach(file => {
-        const Class = require(file);
-        const instance = new Class();
-        Class.prototype.config = this.fastify.config;
-        this.#iterateClassMethods(Class, instance);
-      });
+  /**
+   * Init defenition of the routes
+   */
+  start() {
+    const dirs = glob.sync(this.fastify.config.routesDir + '/*');
+    for (let a = 0; a < dirs.length; a++) {
+      this.#defineRoutes(dirs[a]);
+    }
   }
 
-  #iterateClassMethods(Class, instance) {
-    Object
+  /**
+   * Define the routes placed in a directory
+   */
+  #defineRoutes(dir) {
+    const Class = require(dir);
+    const validators = require(join(dir, 'validators'));
+    const instance = new Class();
+
+    const methods = Object
       .getOwnPropertyNames(Class.prototype)
-      .filter(methodName => !['constructor', 'config'].includes(methodName))
-      .forEach(routeParams => {
-
-        const { prefix } = instance;
-        let [httpMethod, url] = routeParams.split(': ');
-        if (typeof prefix === 'string') {
-          url = prefix + url;
-        }
-        const essential = instance[routeParams]();
-        if (!(essential instanceof Object)) {
-          return;
-        }
-
-        /**
-         * Define schema
-         */
-        const schema = {};
-        const { params, query, body, res, auth, filters, description } = essential;
-
-        if (params instanceof Object) {
-          schema.params = this.#getBlankValidator(params);
-        }
-        if (query instanceof Object) {
-          schema.querystring = this.#getBlankValidator(query);
-          this.#setRequired(schema.querystring);
-        }
-        if (body instanceof Object) {
-          schema.body = this.#getBlankValidator(body);
-          this.#setRequired(schema.body);
-        }
-        if (typeof description === 'string') {
-          schema.description = description;
-        }
-        this.#setResponse(schema, res);
-
-        const result = {
-          method: httpMethod,
-          url,
-          schema,
-          handler: essential.h
-        };
-        if (auth) {
-          result.preValidation = [this.fastify.authenticate];
-        }
-        if (Array.isArray(filters)) {
-          this.#setFilters(filters, result);
-        }
-        this.fastify.route(result);
-      });
-  }
-
-  #setFilters(filters, result) {
-    filters.forEach(filter => {
-      const [ className, methodName ] = filter.split('.');
-      const filterFunction = this.fastify.filters[className][methodName];
-
-      if (Array.isArray(result.preValidation)) {
-        result.preValidation.push(filterFunction);
-      } else {
-        result.preValidation = [filterFunction];
+      .filter(method => method != 'constructor');
+    
+    for (let a = 0; a < methods.length; a++) {
+      const metaData = methods[a];
+      const [httpMethod, url, ...routeMiddlewares] = metaData
+        .split(/[\s+\|,]/g)
+        .filter(e => e.length > 0);
+  
+      const handler = instance[metaData];
+      const routeData = {
+        method: httpMethod,
+        url: instance.prefix + url,
+        handler
+      };
+      const schema = validators[`${httpMethod} ${url}`];
+      if (schema instanceof Object) {
+        routeData.schema = schema;
       }
-    });
-  }
-
-  #getBlankValidator(properties) {
-    return {
-      type: 'object',
-      properties
-    };
-  }
-
-  #setRequired(object) {
-    const { properties } = object;
-    if (properties.hasOwnProperty('Required')) {
-      const required = properties.Required;
-      delete properties.Required;
-      object.required = required;
+  
+      this.#setMiddlewares(routeMiddlewares, routeData);
+      this.fastify.route(routeData);
     }
   }
 
-  #setResponse(schema, res) {
-    let properties = {
-      ok: { type: 'boolean' }
-    };
-    if (res instanceof Object) {
-      properties = { ...properties, ...res };
+  /**
+   * Set list of middlewares for a route
+   */
+  #setMiddlewares(routeMiddlewares, routeData) {
+    if (routeMiddlewares.length < 1) {
+      return;
     }
-    schema.response = {
-      200: {
-        type: 'object',
-        properties
-      },
-      '4xx': {
-        type: 'object',
-        properties: {
-          ok: { type: 'boolean' },
-          errors: {
-            type: 'object',
-            patternProperties: {
-              "^[a-z0-9]+$": { type: 'string' }
-            },
-            maxProperties: 5
-          },
-          message: { type: 'string' }
-        }
-      },
-      '5xx': {
-        type: 'object',
-        properties: {
-          ok: { type: 'boolean' },
-          message: { type: 'string' }
-        }
+    const result = [];
+    for (let a = 0; a < routeMiddlewares.length; a++) {
+      const name = routeMiddlewares[a];
+      const middleware = this.fastify.middlewares[name];
+      
+      if (!(middleware instanceof Function)) {
+        throw new Error(`The middleware "${name}" is not defined`);
       }
-    };
+      result.push(middleware);
+    }
+    if (result.length > 0) {
+      routeData.preHandler = result;
+    }
   }
 }
+
+module.exports = fp(async function(fastify, options) {
+  const routes = new Routes(fastify);
+  routes.start();
+});

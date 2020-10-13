@@ -8,22 +8,22 @@ class Member {
   /**
    * List of chat's members
    */
-  ['GET: /:chat_id']() {}
+  ['GET /:chat_id']() {}
 
   /**
    * Delete member from chat
    */
-  ['DELETE: /:chat_id/:user_id']() {}
+  ['DELETE /:chat_id/:user_id']() {}
 
   /**
    * Add new member(s)
    */
-  ['POST: /:chat_id']() {}
+  ['POST /:chat_id']() {}
 
   /**
    * Info about member
    */
-  ['GET: /:chat_id/:user_id']() {}
+  ['GET /:chat_id/:user_id']() {}
 }
 
 module.exports = Member;
