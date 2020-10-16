@@ -93,6 +93,20 @@ const config = {
   auth: {
     maxAttemptsToLogin: 4,
     blockedUserTtl: 60 * 60 // being measured in seconds
+  },
+  user: {
+    confirmEmail: {
+      codeLength: 20,
+      ttl: 1000 * 60 * 60
+    },
+    resetPassword: {
+      codeLength: 40,
+      ttl: 1000 * 60 * 60 * 24,
+      attempts: {
+        value: 5,
+        ttl: 60 * 5
+      }
+    }
   }
 };
 

@@ -46,6 +46,30 @@ const validators = {
         }
       }
     },
+  },
+  ['POST /reset-password/start']: {
+    description: 'Reset password (start the procedure)',
+    body: {
+      type: 'object',
+      properties: {
+        email
+      },
+      required: ['email']
+    }
+  },
+  ['PUT /reset-password/complete']: {
+    description: 'Reset password (start the procedure)',
+    body: {
+      type: 'object',
+      properties: {
+        email,
+        password,
+        code: {
+          type: 'string'
+        }
+      },
+      required: ['email', 'password', 'code']
+    }
   }
 };
 

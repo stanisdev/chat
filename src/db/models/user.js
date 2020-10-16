@@ -21,6 +21,30 @@ const userSchema = new mongoose.Schema({
     maxlength: 50,
     required: true
   },
+  /**
+   * 1 - user confirmed email
+   * 0 - email not confirmed
+   * -1 - user is banned
+   */
+  status: {
+    type: Number,
+    default: 0,
+    min: -1,
+    max: 1
+  },
+  /**
+   * This field is used to confirm email
+   * or reset password
+   */
+  code: {
+    value: {
+      type: String,
+      maxlength: 40
+    },
+    ttl: {
+      type: Date
+    }
+  },
   name: {
     type: String,
     minlength: 1,

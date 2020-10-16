@@ -80,7 +80,7 @@ class Chat {
   /**
    * Messages of specific chat
    */
-  async ['GET /:chat_id | auth, isChatMember'](req) {
+  async ['GET /:chat_id | auth, chat.is-member'](req) {
     const { limit, page } = req.query;
     const params = {
       chatId: req.params.chat_id,
@@ -107,7 +107,7 @@ class Chat {
    * Leave/delete chat
    * @todo: define schema
    */
-  async ['DELETE /:chat_id | auth, isChatMember'](req) {
+  async ['DELETE /:chat_id | auth, chat.is-member'](req) {
     const params = {
       userId: req.user._id,
       chat: req.chat
@@ -125,7 +125,7 @@ class Chat {
    * @todo: define schema
    * @todo: add localization for the error messages
    */
-  async ['PUT /:chat_id/add_member/:user_id | auth, isChatMember, isChatAdmin']({
+  async ['PUT /:chat_id/add_member/:user_id | auth, chat.is-member, chat.is-admin']({
     chat, params
   }) {
     if (chat.type !== 1) {

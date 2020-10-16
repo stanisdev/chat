@@ -20,7 +20,7 @@ const middlewares = {
   /**
    * Check whether a user is member of a chat
    */
-  async isChatMember(req) {
+  async ['chat.is-member'](req) {
     const chat = await this.db.Chat.findOne({
       _id: req.params.chat_id,
       'members.user_id': req.user._id
@@ -33,7 +33,7 @@ const middlewares = {
   /**
    * Check whether a user is admin of a chat
    */
-  async isChatAdmin(req) {
+  async ['chat.is-admin'](req) {
     const member = req.chat.members.find(m => m.user_id === req.user._id);
     if (!(member instanceof Object) || member.status !== 1) {
       throw this.Boom.forbidden('You do not have an appropriate rights');
@@ -42,19 +42,17 @@ const middlewares = {
   /**
    * Check whether a user has made too many attempts to login
    */
-  async maxAttemptsToLogin(req) {
-    const limit = this.config.auth.maxAttemptsToLogin - 1;
-    let count = await this.redis.get(`e:${req.body.email}`);
-    count = parseInt(count);
-    if (!Number.isInteger(count)) {
-      return;
-    }
-    if (count > limit) {
+  async ['login.max-attempts'](req) {
+    const key = `e:${req.body.email}:login`;
+    const count = +await this.redis.get(key);
+
+    if (count >= this.config.auth.maxAttemptsToLogin) {
       throw this.Boom.forbidden({
         email: 'You have exceeded the maximum allowable count of attempts to login'
       });
     }
-    req.loginAttempts = count;
+    req.key = key;
+    req.attempts = count;
   },
   /**
    * The restriction to prevent updating too many message statuses
@@ -72,7 +70,22 @@ const middlewares = {
   /**
    * Check whether a user is owner of a message
    */
-  async isMessageOwner(req) {}
+  async isMessageOwner(req) {},
+  /**
+   * Check whether a user has exceeded the maximum attempts
+   * to complete resetting password
+   */
+  async ['reset-password.max-attempts'](req) {
+    const key = `e:${req.body.email}:reset_password`;
+    const count = +await this.redis.get(key);
+    if (count >= this.config.user.resetPassword.attempts.value) {
+      throw this.Boom.forbidden({
+        email: 'You have exceeded the maximum allowable count of attempts to reset password'
+      });
+    }
+    req.key = key;
+    req.attempts = count;
+  }
 };
 
 module.exports = middlewares;

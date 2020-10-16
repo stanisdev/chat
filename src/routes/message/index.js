@@ -8,7 +8,7 @@ class Message {
   /**
    * Write new message
    */
-  async ['POST /:chat_id | auth, isChatMember']({chat, body, user}) {
+  async ['POST /:chat_id | auth, chat.is-member']({chat, body, user}) {
     const userId = user._id;
     const data = { userId, chat, body };
     const message = await this.serviceMessage.create(data);
@@ -37,7 +37,7 @@ class Message {
    * Update status of messages
    * @todo: define schema
    */
-  async ['GET /:chat_id/:ids | auth, isChatMember, maxIds'](req) {
+  async ['GET /:chat_id/:ids | auth, chat.is-member, maxIds'](req) {
     const userId = req.user._id;
     const params = {
       ids: req.params.ids,
@@ -66,7 +66,7 @@ class Message {
    * Delete messages
    * @todo: define schema
    */
-  async ['DELETE /:chat_id/:ids | auth, isChatMember'](req) {
+  async ['DELETE /:chat_id/:ids | auth, chat.is-member'](req) {
     let { ids, chat_id: chatId } = req.params;
     try {
       ids = ids.split(',');
