@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "email-exists": "Email already exists",
+    "incorrect-code": "Unrecognizable code value",
+    "code-expired": "The code has expired",
+    "email-is-not-confirmed": "You did not confirm the email address",
+    "wrong-email-password": "Wrong email/password",
+    "incorrect-reset-password-code": "Wrong value of code or availability of the code has expired"
+  }
+}

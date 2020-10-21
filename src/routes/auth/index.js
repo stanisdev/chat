@@ -12,13 +12,15 @@ class Auth {
   /**
    * Registration of a user
    */
-  async ['POST /register']({ body }) {
+  async ['POST /register']({ body, t }) {
     const { User } = this.db;
     const check = await User.findOne({
       email: body.email
     });
     if (check instanceof Object) {
-      throw this.Boom.badRequest({ email: 'Email already exists' });
+      throw this.Boom.badRequest({
+        email: t('auth.email-exists')
+      });
     }
     const config = this.config.user.confirmEmail;
     /**
@@ -38,12 +40,14 @@ class Auth {
   /**
    * Confirm user's email
    */
-  async ['GET /confirm/:code']({ params }) {
+  async ['GET /confirm/:code']({ params, t }) {
     const user = await this.db.User.findOne({
       'code.value': params.code
     }, '_id code status');
     if (!(user instanceof Object)) {
-      throw this.Boom.badRequest({ code: 'Unrecognizable code value' });
+      throw this.Boom.badRequest({
+        code: t('auth.incorrect-code')
+      });
     }
     const { ttl } = user.code;
     /**
@@ -56,7 +60,9 @@ class Auth {
         { _id: user._id },
         { $unset: { code: '' } }
       );
-      throw this.Boom.badRequest({ code: 'The code has expired' });
+      throw this.Boom.badRequest({
+        code: t('auth.code-expired')
+      });
     }
     user.code = {};
     user.status = 1;
@@ -70,7 +76,7 @@ class Auth {
   async ['POST /login | login.max-attempts']({
     body: { email, password },
     attempts,
-    key
+    key, t
   }) {
     let user = await this.db.User.findOne({ email });
     try {
@@ -81,10 +87,14 @@ class Auth {
        * Increase counter of attempts in redis
        */
       await this.redis.set(key, attempts + 1, 'EX', this.config.auth.blockedUserTtl);
-      throw this.Boom.badRequest({ password: 'Wrong email/password' });
+      throw this.Boom.badRequest({
+        password: t('auth.wrong-email-password')
+      });
     }
     if (user.status === 0) {
-      throw this.Boom.forbidden({ email: 'You did not confirm the email address' });
+      throw this.Boom.forbidden({
+        email: t('auth.email-is-not-confirmed')
+      });
     }
 
     user = pick(user, ['_id', 'name']);
@@ -120,7 +130,7 @@ class Auth {
   async ['PUT /reset-password/complete | reset-password.max-attempts']({
     body,
     key,
-    attempts
+    attempts, t
   }) {
     const user = await this.db.User.findOne({ email: body.email });
     if (!(user instanceof Object)) {
@@ -135,7 +145,7 @@ class Auth {
       await this.redis.set(key, attempts + 1, 'EX', ttl);
 
       throw this.Boom.badRequest({
-        code: 'Wrong value of code or availability of the code has expired'
+        code: t('auth.incorrect-reset-password-code')
       });
     }
     /**

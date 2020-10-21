@@ -17,6 +17,7 @@ fastify.register(require('./services'));
 fastify.register(require('./middlewares'));
 fastify.register(require('./swagger'));
 fastify.register(require('./websocket'));
+fastify.register(require('./i18next'));
 fastify.register(require('./routes'));
 
 const start = async () => {

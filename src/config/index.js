@@ -41,6 +41,7 @@ const config = {
   routesDir: join(rootDir, 'routes'),
   servicesDir: join(rootDir, 'services'),
   middlewaresDir: join(rootDir, 'middlewares'),
+  localesDir: join(rootDir, 'locales'),
   host: process.env.HOST || '127.0.0.1',
   dbDirs: {
     models: join(rootDir, 'db', 'models'),
