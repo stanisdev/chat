@@ -101,7 +101,7 @@ const validators = {
       }
     }
   },
-  ['PUT /']: {
+  ['POST /']: {
     description: 'Creating a new chat',
     body: {
       type: 'object',
@@ -125,7 +125,7 @@ const validators = {
       chat: {
         type: 'object',
         properties: {
-          id: { type: 'string' }
+          _id: { type: 'string' }
         }
       }
     },

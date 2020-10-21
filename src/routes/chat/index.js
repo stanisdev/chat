@@ -92,14 +92,51 @@ class Chat {
   }
 
   /**
-   * Create chat
+   * Create new chat
+   * @todo: add restriction of creating too many chats per hour
    */
-  async ['POST / | auth'](req) {
-    const params = { ...req.body, ...{ userId: req.user._id } };
-    const chat = await this.serviceChat.create(params);
+  async ['POST / | auth']({
+    body: { members, type },
+    user: owner, t
+  }) {
+    members = [... new Set(members)].filter(id => id !== owner._id);
+    if (members.length < 1) {
+      throw this.Boom.badRequest({
+        members: t('chat.wrong-members')
+      });
+    }
+    const isDialog = type === 0;
+    members.push(owner._id);
+    /**
+     * Check dialog existence
+     */
+    if (isDialog) {
+      if (members.length !== 2) {
+        throw this.Boom.badRequest({
+          members: t('chat.wrong-members-for-dialog')
+        });
+      }
+      const chat = await this.db.Chat.findDialog(members);
+      if (chat instanceof Object) {
+        return chat;
+      }
+    }
+    /**
+     * Check correctness of members ids
+     */
+    const users = await this.db.User.find({
+      _id: { $in: members }
+    });
+    if (users.length !== members.length) {
+      throw this.Boom.badRequest({
+        members: t('chat.wrong-members')
+      });
+    }
+    const chat = await this.db.Chat.createNew({
+      members, users, isDialog, owner, type
+    });
     return {
-      ok: true,
-      chat: pick(chat, ['id'])
+      chat: pick(chat, ['_id', 'type'])
     };
   }
 
@@ -113,7 +150,8 @@ class Chat {
       chat: req.chat
     };
     /**
-     * @todo: Add condition, if chat has been removed then remove all related messages
+     * @todo: Add condition, if chat has been removed
+     * then remove all related messages
      */
     await this.serviceChat.leaveChat(params);
     return { ok: true };

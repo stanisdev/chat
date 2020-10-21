@@ -157,6 +157,11 @@ class Auth {
     await user.save();
     return { ok: true };
   }
+
+  /**
+   * Resend confirm code 
+   */
+  async ['POST /confirm-code/resend']() {}
 }
 
 module.exports = Auth;

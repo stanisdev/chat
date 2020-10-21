@@ -1,7 +1,7 @@
 'use string'
 
 const mongoose = require('mongoose');
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
 const paginate = require('../../plugins/mongoosePaginate');
 
 const memberSchema = new mongoose.Schema({
@@ -65,13 +65,32 @@ const instanceMethods = {
 
 const staticMethods = {
   findDialog(members) {
-    members = members.map(member => {
-      return { 'members.user_id': member };
-    });
+    members = members.map(member => ({
+      'members.user_id': member
+    }));
     return this.findOne({
       type: 0,
       $and: members
     });
+  },
+
+  createNew({ members, users, isDialog, owner, type }) {
+    members = members.map(memberId => {
+      const user = users.find(user => user._id === memberId);
+      const result = {
+        user_id: memberId,
+        name: user.name
+      };
+
+      if (isDialog) {
+        result.is_deleted = false;
+        return result;
+      }
+      result.status = memberId === owner._id ? 1 : 0;
+      return result;
+    });
+    const chat = new this({ type, members });
+    return chat.save();
   },
 
   findAllByMemberId(userId) {
