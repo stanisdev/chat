@@ -11,7 +11,6 @@ class Auth {
 
   /**
    * Registration of a user
-   * @todo: generate code to confirm the email
    */
   async ['POST /register']({ body }) {
     const { User } = this.db;
@@ -21,8 +20,46 @@ class Auth {
     if (check instanceof Object) {
       throw this.Boom.badRequest({ email: 'Email already exists' });
     }
+    const config = this.config.user.confirmEmail;
+    /**
+     * Define a code to confirm email
+     * @todo: add mailer
+     */
+    body.code = {
+      value: await nanoid(config.codeLength),
+      ttl: new Date(Date.now() + config.ttl)
+    }
     const user = new User(body);
     await user.cryptPassword();
+    await user.save();
+    return { ok: true };
+  }
+
+  /**
+   * Confirm user's email
+   */
+  async ['GET /confirm/:code']({ params }) {
+    const user = await this.db.User.findOne({
+      'code.value': params.code
+    }, '_id code status');
+    if (!(user instanceof Object)) {
+      throw this.Boom.badRequest({ code: 'Unrecognizable code value' });
+    }
+    const { ttl } = user.code;
+    /**
+     * If ttl has expired thrown the error and 
+     * remove the 'code' field
+     */
+    if (ttl <= new Date()) {
+      user.code = {};
+      await this.db.User.updateOne(
+        { _id: user._id },
+        { $unset: { code: '' } }
+      );
+      throw this.Boom.badRequest({ code: 'The code has expired' });
+    }
+    user.code = {};
+    user.status = 1;
     await user.save();
     return { ok: true };
   }
@@ -45,6 +82,9 @@ class Auth {
        */
       await this.redis.set(key, attempts + 1, 'EX', this.config.auth.blockedUserTtl);
       throw this.Boom.badRequest({ password: 'Wrong email/password' });
+    }
+    if (user.status === 0) {
+      throw this.Boom.forbidden({ email: 'You did not confirm the email address' });
     }
 
     user = pick(user, ['_id', 'name']);

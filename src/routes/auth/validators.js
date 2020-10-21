@@ -1,5 +1,7 @@
 'use strict';
 
+const config = require('../../config');
+
 const email = {
   type: 'string',
   format: 'email',
@@ -24,6 +26,18 @@ const validators = {
         },
       },
       required: ['email', 'password', 'name']
+    }
+  },
+  ['GET /confirm/:code']: {
+    description: `Confirm user's email using a code`,
+    params: {
+      type: 'object',
+      properties: {
+        code: {
+          minLength: config.user.confirmEmail.codeLength,
+          maxLength: config.user.confirmEmail.codeLength
+        }
+      }
     }
   },
   ['POST /login']: {
