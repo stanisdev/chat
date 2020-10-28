@@ -1,7 +1,7 @@
 'use string'
 
 const mongoose = require('mongoose');
-const nanoid = require('nanoid');
+const { nanoid } = require('nanoid');
 const paginate = require('../../plugins/mongoosePaginate');
 
 const messageSchema = new mongoose.Schema({
@@ -40,9 +40,9 @@ const messageSchema = new mongoose.Schema({
       // index: true // @todo: uncomment this
     },
     /**
-     * Value of message status belonging specific user
-     * 0 - received to the server
-     * 1 - has been read by user
+     * Message statuses related to a user
+     * 0 - received by the server
+     * 1 - has been read by a user
      * 2 - deleted
      */
     value: {
@@ -60,64 +60,6 @@ const messageSchema = new mongoose.Schema({
 });
 
 const staticMethods = {
-  getLastMessages({ userId, allChatsIds, limit, page }) {
-    const skip = limit * (page - 1);
-
-    return this.aggregate([
-      { $match: {
-          'statuses.recipient_id': userId,
-          chat_id: { $in: allChatsIds }
-        }
-      },
-      { $sort: { created_at: -1 } },
-      { $group: {
-          _id: '$chat_id',
-          content: { $first: '$content' },
-          type: { $first: '$type' },
-          author_id: { $first: '$author_id' },
-          chat_id: { $first: '$chat_id' },
-          created_at: { $first: '$created_at' },
-          statuses: { $first: '$statuses' }
-        }
-      },
-      { $sort: { created_at: -1 } },
-      { $lookup: {
-          from: 'users',
-          localField: 'author_id',
-          foreignField: '_id',
-          as: 'author'
-        }
-      },
-      { $lookup: {
-          from: 'chats',
-          localField: 'chat_id',
-          foreignField: '_id',
-          as: 'chat'
-        }
-      },
-      { $skip: skip },
-      { $limit: limit }
-    ]);
-  },
-
-  async countUnread(chatsIds, userId) {
-    const tasks = chatsIds.map(chatId => {
-      return this.countDocuments({
-        chat_id: chatId,
-        statuses: {
-          $elemMatch: {
-            recipient_id: userId,
-            value: 0
-          }
-        }
-      });
-    });
-    const data = await Promise.all(tasks);
-    return data.map((count, index) => {
-      return { count, chatId: chatsIds[index] };
-    });
-  },
-
   findByStatuses({ ids, chatId, userId }) {
     return this.find({
       _id: {

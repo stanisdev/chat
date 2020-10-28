@@ -6,24 +6,45 @@ class Message {
   }
 
   /**
-   * Write new message
+   * Write a message
+   * @todo: Add restriction to write more than 20 messages per hour.
    */
-  async ['POST /:chat_id | auth, chat.is-member']({chat, body, user}) {
-    const userId = user._id;
-    const data = { userId, chat, body };
-    const message = await this.serviceMessage.create(data);
-
-    const receivers = chat.members
-      .filter(m => m.user_id !== userId)
-      .map(m => m.user_id);
-
-    const socketData = {
-      message,
-      receivers,
-      author: user
+  async ['POST /:chat_id | auth, chat.is-member']({
+    body: { content, type },
+    chat: { members, _id: chatId },
+    user: author,
+  }) {
+    /**
+     * Save message to database
+     */
+    const statuses = members.map(member => {
+      const value = member.user_id === author._id ? 1 : 0;
+      return {
+        recipient_id: member.user_id,
+        value
+      };
+    });
+    const data = {
+      author_id: author._id,
+      chat_id: chatId,
+      content,
+      type,
+      statuses
     };
-    this.serviceWebsocket.writeMessage(socketData); // @todo: rewrite this
-    return { ok: true, message };
+    const message = new this.db.Message(data);
+    await message.save();
+    /**
+     * Broadcast the message to the interlocutors
+     */
+    const receivers = [];
+    for (let a = 0; a < members.length; a++) {
+      const member = members[a];
+      if (member.user_id !== author._id) {
+        receivers.push(member.user_id);
+      }
+    }
+    this.serviceWebsocket.writeMessage({ message, receivers, author });
+    return message;
   }
 
   /**

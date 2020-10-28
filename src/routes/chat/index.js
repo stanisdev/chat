@@ -8,73 +8,59 @@ class Chat {
   }
 
   /**
-   * Get user's chats
+   * Get list of chats
    */
-  async ['GET / | auth'](req) {
-    const { limit, page } = req.query;
-    const userId = req.user._id;
-
-    /**
-     * The parameter "allChatsIds" is used to avoid displaying
-     * a chat where user wrote the message(s) and later left the chat.
-     */
-    const allChatsIds = await this.db.Chat.findAllByMemberId(userId);
-    const lastMessages = await this.db.Message.getLastMessages({
-      userId,
-      allChatsIds: allChatsIds.map(c => c._id),
+  async ['GET / | auth']({
+    user,
+    query: { limit, page }
+  }) {
+    const { Chat } = this.db;
+    let chats = await Chat.findAndPaginate({
+      query: {
+        'members.user_id': user._id
+      },
       limit,
       page
     });
+    const chatsIds = chats.map(({ _id }) => _id);
+    const [lastMessages, unreadMessages] = await Promise.all([
+      Chat.getLastMessages(chatsIds),
+      Chat.getUnreadMessages(chatsIds, user._id),
+    ]);
+    /**
+     * Build up array of chats
+     */
+    chats = chats.map(chat => {
+      const isDialog = chat.type === 0;
+      let name;
+      if (isDialog) {
+        const interlocutor = chat.members.find(member => member.user_id !== user._id);
+        name = interlocutor.name;
+      } else {
+        name = chat.name;
+      }
 
-    const interlocutors = [];
-    const unreadChats = [];
-    const chats = lastMessages.map(m => {
-      const [chat] = m.chat;
-      const [author] = m.author;
-      let name = 'Not specified';
-      if (chat.type === 1) {
-        name = `Group chat, ${chat.members.length} members`;
+      const lastMessage = lastMessages.find(message => message.chat_id === chat._id);
+      let author = lastMessage.author?.[0].name;
+      if (typeof author !== 'string') {
+        author = 'Unknown'; // @todo: get from the locales
       }
-      else if (chat.type === 0) {
-        const uId = chat.members.find(m => m.user_id !== userId).user_id;
-        interlocutors.push(uId);
-        name = uId; // This id will be removed by user's name
-      }
-      /**
-       * Determine at least 1 unread message
-       */
-      const status = m.statuses.find(s => s.recipient_id === userId);
-      if (status instanceof Object && status.value === 0) {
-        unreadChats.push(chat._id);
-      }
+      let unreadAmount = unreadMessages
+        .find(element => element.chat_id === chat._id)?.count ?? 0;
+
       return {
         id: chat._id,
-        type: chat.type,
         name,
-        unread_messages: 0,
+        type: chat.type,
         last_message: {
-          content: m.content,
-          type: m.type,
-          created_at: new Date(m.created_at).getTime(),
-          author: {
-            name: author.name
-          }
-        }
+          author,
+          content: lastMessage.content,
+          created_at: lastMessage.created_at
+        },
+        unread_messages: unreadAmount
       };
     });
-    if (interlocutors.length > 0) {
-      const users = await this.db.User.findByManyId(interlocutors);
-      users.forEach(u => {
-        chats.find(c => c.name === u._id).name = u.name;
-      });
-    }
-    if (unreadChats.length > 0) {
-      const unreadCount = await this.db.Message.countUnread(unreadChats, userId);
-      unreadCount.forEach(u => {
-        chats.find(c => c.id === u.chatId).unread_messages = u.count;
-      });
-    }
-    return { ok: true, chats };
+    return chats;
   }
 
   /**

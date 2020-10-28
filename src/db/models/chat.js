@@ -47,7 +47,11 @@ const chatSchema = new mongoose.Schema({
     type: Number,
     default: 0 // 0 - dialog, 1 - group
   },
-  members: [memberSchema]
+  members: [memberSchema],
+  /**
+   * For group chats
+   */
+  name: String
 }, {
   timestamps: {
     createdAt: 'created_at',
@@ -119,6 +123,64 @@ const staticMethods = {
         }
       }
     )
+  },
+
+  getLastMessages(ids) {
+    return mongoose.model('Message').aggregate([
+      {
+        $match: {
+          chat_id: { $in: ids }
+        }
+      },
+      {
+        $sort: { created_at: -1 }
+      },
+      {
+        $group: {
+          _id: '$chat_id',
+          content: { $first: '$content' },
+          type: { $first: '$type' },
+          author_id: { $first: '$author_id' },
+          chat_id: { $first: '$chat_id' },
+          created_at: { $first: '$created_at' },
+          statuses: { $first: '$statuses' }
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'author_id',
+          foreignField: '_id',
+          as: 'author'
+        }
+      }
+    ]);
+  },
+
+  getUnreadMessages(chatIds, userId) {
+    return mongoose.model('Message').aggregate([
+      {
+        $match: {
+          chat_id: { $in: chatIds },
+          statuses: {
+            $elemMatch: { recipient_id: userId, value: 0 }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$chat_id',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          chat_id: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
   }
 };
 

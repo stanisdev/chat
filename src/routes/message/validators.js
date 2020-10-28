@@ -1,8 +1,8 @@
 'use strict';
 
 const validators = {
-  ['PUT /:chat_id']: {
-    description: 'Writing new message to certain chat',
+  ['POST /:chat_id']: {
+    description: 'Writing a message to a chat',
     body: {
       type: 'object',
       properties: {
@@ -14,7 +14,7 @@ const validators = {
       },
       required: ['content', 'type']
     },
-    query: {
+    params: {
       type: 'object',
       properties: {
         chat_id: { type: 'string' }
@@ -36,7 +36,7 @@ const validators = {
           }
         }
       }
-    },
+    }
   },
   ['GET /:chat_id/:ids']: {
     description: 'Updating statuses of one and more messages (mark messages as read)',
