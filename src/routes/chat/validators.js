@@ -3,25 +3,6 @@
 const config = require('../../config');
 
 const validators = {
-  ['GET /get-chats']: {
-    description: 'Get list of user\'s chats',
-    query: {
-      type: 'object',
-      properties: {
-        limit: {
-          type: 'integer',
-          minimum: 1,
-          maximum: config.chats.limit.max,
-          default: config.chats.limit.default,
-        },
-        page: {
-          type: 'integer',
-          minimum: 1,
-          default: 1
-        }
-      }
-    }
-  },
   ['GET /']: {
     description: 'Get list of user\'s chats',
     query: {
@@ -71,7 +52,7 @@ const validators = {
     }
   },
   ['GET /:chat_id']: {
-    description: 'Get list of messages of certain chat',
+    description: 'Get list of messages of a chat',
     params: {
       type: 'object',
       properties: {

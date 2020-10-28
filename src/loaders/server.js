@@ -3,6 +3,7 @@
 // const cors = require('cors');
 const config = require('../config');
 const fastify = require('fastify')(config.server);
+const helmet = require('fastify-helmet');
 const { pick } = require('lodash');
 
 fastify.register(require('fastify-formbody'));
@@ -19,6 +20,11 @@ fastify.register(require('./swagger'));
 fastify.register(require('./websocket'));
 fastify.register(require('./i18next'));
 fastify.register(require('./routes'));
+
+fastify.register(
+  helmet,
+  { hidePoweredBy: { setTo: 'PHP 7.2.34' } }
+);
 
 const start = async () => {
   try {

@@ -55,7 +55,7 @@ class Chat {
       if (isDialog) {
         const interlocutor = chat.members.find(member => member.user_id !== user._id);
         result.name = interlocutor.name;
-        result.last_message.has_been_read = Boolean(lastMessage.has_been_read);
+        result.last_message.viewed = Boolean(lastMessage.viewed);
       }
       else {
         result.name = chat.name;
@@ -66,17 +66,64 @@ class Chat {
   }
 
   /**
-   * Messages of specific chat
+   * Get messages from a chat
    */
-  async ['GET /:chat_id | auth, chat.is-member'](req) {
-    const { limit, page } = req.query;
-    const params = {
-      chatId: req.params.chat_id,
+  async ['GET /:chat_id | auth, chat.is-member']({
+    query: { limit, page },
+    chat,
+    user
+  }) {
+    const messages = await this.db.Message.findAndPaginate({
+      query: {
+        chat_id: chat._id,
+        'statuses.recipient_id': user._id
+      },
+      sort: { created_at: -1 },
       limit,
       page
-    }
-    const messages = await this.serviceMessage.getMany(params);
-    return { ok: true, messages };
+    });
+    const authorsIds = [...new Set(
+      messages.map(message => message.author_id)
+    )];
+    const authors = await this.db.User.find({
+      _id: { $in: authorsIds }
+    }, '_id, name');
+
+    /**
+     * Build up the list of the messages
+     */
+    const result = messages.map(({
+      _id: id,
+      created_at,
+      author_id,
+      content,
+      type,
+      statuses,
+      viewed
+    }) => {
+      const author = authors.find(author => author._id === author_id);
+      const message = {
+        id,
+        content,
+        type,
+        created_at,
+        author: {
+          id: author._id,
+          name: author.name
+        }
+      };
+      if (chat.type === 0 && user._id === author_id) {
+        if (typeof viewed === 'boolean') {
+          message.viewed = viewed;
+        }
+        else {
+          const status = statuses.find(status => status.recipient_id !== user._id);
+          message.viewed = Boolean(status?.value);
+        }
+      }
+      return message;
+    });
+    return result;
   }
 
   /**
@@ -148,7 +195,7 @@ class Chat {
   }
 
   /**
-   * Add new user to a chat
+   * Add new member to a chat
    * @todo: define schema
    * @todo: add localization for the error messages
    */

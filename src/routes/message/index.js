@@ -57,7 +57,7 @@ class Message {
   /**
    * Update status of messages
    * @todo: define schema
-   * @todo: update the field "has_been_read"
+   * @todo: update the field "viewed"
    */
   async ['GET /:chat_id/:ids | auth, chat.is-member, maxIds'](req) {
     const userId = req.user._id;
