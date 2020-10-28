@@ -142,6 +142,7 @@ const staticMethods = {
           type: { $first: '$type' },
           author_id: { $first: '$author_id' },
           chat_id: { $first: '$chat_id' },
+          has_been_read: { $first: '$has_been_read' },
           created_at: { $first: '$created_at' },
           statuses: { $first: '$statuses' }
         }

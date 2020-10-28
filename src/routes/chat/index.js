@@ -32,13 +32,6 @@ class Chat {
      */
     chats = chats.map(chat => {
       const isDialog = chat.type === 0;
-      let name;
-      if (isDialog) {
-        const interlocutor = chat.members.find(member => member.user_id !== user._id);
-        name = interlocutor.name;
-      } else {
-        name = chat.name;
-      }
 
       const lastMessage = lastMessages.find(message => message.chat_id === chat._id);
       let author = lastMessage.author?.[0].name;
@@ -48,17 +41,26 @@ class Chat {
       let unreadAmount = unreadMessages
         .find(element => element.chat_id === chat._id)?.count ?? 0;
 
-      return {
+      const result = {
         id: chat._id,
-        name,
+        name: null,
         type: chat.type,
         last_message: {
           author,
           content: lastMessage.content,
-          created_at: lastMessage.created_at
+          created_at: lastMessage.created_at,
         },
         unread_messages: unreadAmount
       };
+      if (isDialog) {
+        const interlocutor = chat.members.find(member => member.user_id !== user._id);
+        result.name = interlocutor.name;
+        result.last_message.has_been_read = Boolean(lastMessage.has_been_read);
+      }
+      else {
+        result.name = chat.name;
+      }
+      return result;
     });
     return chats;
   }
@@ -80,6 +82,8 @@ class Chat {
   /**
    * Create new chat
    * @todo: add restriction of creating too many chats per hour
+   * @todo: during the creation of a group chat require 
+   * to specify the name
    */
   async ['POST / | auth']({
     body: { members, type },
@@ -142,7 +146,6 @@ class Chat {
     await this.serviceChat.leaveChat(params);
     return { ok: true };
   }
-
 
   /**
    * Add new user to a chat

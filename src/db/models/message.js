@@ -51,7 +51,12 @@ const messageSchema = new mongoose.Schema({
       min: 0,
       max: 2
     }
-  }]
+  }],
+  /**
+   * The flag that is used to show whether a message
+   * has been eventually read or not.
+   */
+  has_been_read: Boolean
 }, {
   timestamps: {
     createdAt: 'created_at',
