@@ -9,6 +9,8 @@
   },
   "chat": {
     "wrong-members": "The list of members contains some incorrect value",
-    "wrong-members-for-dialog": "Amount of members for a dialog chat has to be equal 1"
+    "wrong-members-for-dialog": "Amount of members for a dialog chat has to be equal 1",
+    "not-found": "Chat not found",
+    "user-left-chat": "left the chat"
   }
 }

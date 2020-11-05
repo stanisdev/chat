@@ -26,7 +26,9 @@ const middlewares = {
       'members.user_id': req.user._id
     });
     if (!(chat instanceof Object)) {
-      throw this.Boom.forbidden('Access to chat is restricted');
+      throw this.Boom.forbidden({
+        chat_id: req.t('chat.not-found')
+      });
     }
     req.chat = chat;
   },

@@ -71,7 +71,7 @@ class Chat {
   async ['GET /:chat_id | auth, chat.is-member']({
     query: { limit, page },
     chat,
-    user
+    user, t
   }) {
     const messages = await this.db.Message.findAndPaginate({
       query: {
@@ -120,6 +120,13 @@ class Chat {
           const status = statuses.find(status => status.recipient_id !== user._id);
           message.viewed = Boolean(status?.value);
         }
+      }
+      /**
+       * Set appropriate translation for a message
+       * with status 'system/message'
+       */
+      if (message.type === 'system/message') {
+        message.content = message.author.name + ' ' + t(`chat.${message.content}`);
       }
       return message;
     });
@@ -178,19 +185,38 @@ class Chat {
   }
 
   /**
-   * Leave/delete chat
-   * @todo: define schema
+   * Leave/delete a chat
    */
-  async ['DELETE /:chat_id | auth, chat.is-member'](req) {
-    const params = {
-      userId: req.user._id,
-      chat: req.chat
-    };
+  async ['DELETE /:chat_id | auth, chat.is-member']({
+    user: { _id: userId },
+    chat: { _id: chatId, members, type }
+  }) {
+    const { Chat } = this.db;
     /**
-     * @todo: Add condition, if chat has been removed
-     * then remove all related messages
+     * If a group chat
      */
-    await this.serviceChat.leaveChat(params);
+    if (type === 1) {
+      if (members.length > 1) {
+        const recipients = members.map(member => member.user_id);
+        await Chat.removeMember(chatId, userId, recipients);
+      }
+      else {
+        await Chat.removeOneById(chatId);
+      }
+    } else {
+      const interlocutor = members.find(member => member.user_id !== userId);
+
+      /**
+       * The interlocutor of a dialog has left also
+       * then remove the chat.
+       */
+      if (interlocutor.is_deleted) {
+        await Chat.removeOneById(chatId);
+      }
+      else {
+        await Chat.setMemberAsDeleted(chatId, userId);
+      }
+    }
     return { ok: true };
   }
 

@@ -129,6 +129,18 @@ const validators = {
         }
       }
     },
+  },
+  ['DELETE /:chat_id']: {
+    description: 'A user left a chat',
+    params: {
+      type: 'object',
+      properties: {
+        chat_id: {
+          type: 'string',
+          maxLength: 8
+        }
+      }
+    }
   }
 };
 

@@ -104,10 +104,14 @@ const staticMethods = {
   },
 
   removeOneById(id) {
-    return this.remove(
-      { _id: id },
-      { justOne: true }
-    );
+    return Promise.all([
+      this.deleteOne(
+        { _id: id }
+      ),
+      mongoose.model('Message').deleteMany({
+        chat_id: id
+      })
+    ]);
   },
 
   addMember({ member, chat }) {
@@ -125,11 +129,48 @@ const staticMethods = {
     )
   },
 
+  setMemberAsDeleted(chatId, userId) {
+    return this.updateOne(
+      { 
+        _id: chatId,
+        'members.user_id': userId
+      },
+      { $set:
+        { 'members.$.is_deleted': true }
+      }
+   );
+  },
+
+  removeMember(chatId, userId, recipients) {
+    const statuses = recipients.map(id => {
+      return {
+        recipient_id: id
+      };
+    });
+    const message = new mongoose.model('Message')({
+      author_id: userId,
+      chat_id: chatId,
+      content: 'user-left-chat',
+      type: 'system/message',
+      statuses
+    });
+    return Promise.all([
+      message.save(),
+      this.updateOne(
+        { _id: chatId },
+        { $pull:
+          { 'members': { user_id: userId } }
+        }
+      )
+    ]);
+  },
+
   getLastMessages(ids) {
     return mongoose.model('Message').aggregate([
       {
         $match: {
-          chat_id: { $in: ids }
+          chat_id: { $in: ids },
+          type: { $ne: 'system/message' }
         }
       },
       {
