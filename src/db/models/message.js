@@ -1,10 +1,10 @@
 'use string'
 
-const mongoose = require('mongoose');
+const { Schema, model } = require('mongoose');
 const { nanoid } = require('nanoid');
 const paginate = require('../../plugins/mongoosePaginate');
 
-const messageSchema = new mongoose.Schema({
+const messageSchema = new Schema({
   _id: {
     type: String,
     default() {
@@ -35,6 +35,13 @@ const messageSchema = new mongoose.Schema({
     ],
     required: true
   },
+  /**
+   * This field is intended to store data
+   * related to the messages of system type.
+   */
+  metadata: {
+    type: Schema.Types.Mixed
+  },
   statuses: [{
     _id: false,
     recipient_id: {
@@ -57,7 +64,7 @@ const messageSchema = new mongoose.Schema({
     }
   }],
   /**
-   * The flag that is used to show whether a message
+   * The flag is used to show whether a message
    * has been eventually viewed or not.
    */
   viewed: Boolean
@@ -88,4 +95,4 @@ const staticMethods = {
 messageSchema.statics = staticMethods;
 messageSchema.plugin(paginate);
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = model('Message', messageSchema);

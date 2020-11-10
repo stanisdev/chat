@@ -114,19 +114,59 @@ const staticMethods = {
     ]);
   },
 
-  addMember({ member, chat }) {
-    return this.update(
-      { _id: chat._id },
-      {
-        $push: {
-          members: {
-            user_id: member._id,
-            name: member.name,
-            status: 0
+  /**
+   * Add one or more new members to a chat
+   */
+  addMembers({ adminId, chatId, users, recipients }) {
+    const members = [];
+    const tasks = [];
+    const statuses = recipients.map(userId => {
+      return {
+        recipient_id: userId,
+        value: 0
+      };
+    });
+
+    for (let a = 0; a < users.length; a++) {
+      const user = users[a];
+      members.push({
+        user_id: user._id,
+        name: user.name,
+        status: 0
+      });
+
+      /**
+       * This system message logs a fact of
+       * members being added
+       */
+      const message = new mongoose.model('Message')({
+        author_id: adminId,
+        chat_id: chatId,
+        content: 'user-added-to-chat',
+        type: 'system/message',
+        statuses,
+        metadata: {
+          user_id: user._id,
+        }
+      });
+      tasks.push(message.save());
+    }
+    /**
+     * Update the field "members" of a chat.
+     */
+    tasks.push(
+      this.updateOne(
+        { _id: chatId },
+        {
+          $push: {
+            members: {
+              $each: members
+            }
           }
         }
-      }
-    )
+      )
+    );
+    return Promise.all(tasks);
   },
 
   setMemberAsDeleted(chatId, userId) {
@@ -204,6 +244,7 @@ const staticMethods = {
       {
         $match: {
           chat_id: { $in: chatIds },
+          type: { $ne: 'system/message' },
           statuses: {
             $elemMatch: { recipient_id: userId, value: 0 }
           }

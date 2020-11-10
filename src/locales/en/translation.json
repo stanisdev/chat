@@ -11,6 +11,12 @@
     "wrong-members": "The list of members contains some incorrect value",
     "wrong-members-for-dialog": "Amount of members for a dialog chat has to be equal 1",
     "not-found": "Chat not found",
-    "user-left-chat": "left the chat"
+    "user-left-chat": "left the chat",
+    "user-is-not-admin": "The chat is not available for editing",
+    "user-already-in-chat": "The user already in the chat",
+    "user-added-to-chat": "was added to the chat"
+  },
+  "user": {
+    "not-found": "User not found"
   }
 }

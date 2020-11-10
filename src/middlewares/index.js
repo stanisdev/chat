@@ -21,8 +21,9 @@ const middlewares = {
    * Check whether a user is member of a chat
    */
   async ['chat.is-member'](req) {
+    const chatId = req.params.chat_id ?? req.body.chat_id;
     const chat = await this.db.Chat.findOne({
-      _id: req.params.chat_id,
+      _id: chatId,
       'members.user_id': req.user._id
     });
     if (!(chat instanceof Object)) {
@@ -36,9 +37,12 @@ const middlewares = {
    * Check whether a user is admin of a chat
    */
   async ['chat.is-admin'](req) {
-    const member = req.chat.members.find(m => m.user_id === req.user._id);
-    if (!(member instanceof Object) || member.status !== 1) {
-      throw this.Boom.forbidden('You do not have an appropriate rights');
+    await middlewares['chat.is-member'].bind(this)(req);
+    const member = req.chat.members.find(member => member.user_id === req.user._id);
+    if (member?.status !== 1) {
+      throw this.Boom.forbidden({
+        chat_id: req.t('chat.user-is-not-admin')
+      });
     }
   },
   /**

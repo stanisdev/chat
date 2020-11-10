@@ -141,6 +141,30 @@ const validators = {
         }
       }
     }
+  },
+  ['PUT /add_members']: {
+    description: 'Adding new members',
+    body: {
+      type: 'object',
+      properties: {
+        chat_id: {
+          type: 'string',
+          maxLength: 8
+        },
+        user_ids: {
+          type: 'array',
+          minItems: 1,
+          /**
+           * @todo: add limit
+           */
+          items: {
+            type: 'string',
+            maxLength: 8
+          }
+        }
+      },
+      required: ['chat_id', 'user_ids']
+    }
   }
 };
 

@@ -124,6 +124,8 @@ class Chat {
       /**
        * Set appropriate translation for a message
        * with status 'system/message'
+       * 
+       * @todo: Process the case when a user was added
        */
       if (message.type === 'system/message') {
         message.content = message.author.name + ' ' + t(`chat.${message.content}`);
@@ -221,28 +223,43 @@ class Chat {
   }
 
   /**
-   * Add new member to a chat
-   * @todo: define schema
-   * @todo: add localization for the error messages
+   * Add new members to a chat
    */
-  async ['PUT /:chat_id/add_member/:user_id | auth, chat.is-member, chat.is-admin']({
-    chat, params
+  async ['PUT /add_members | auth, chat.is-admin']({
+    body,
+    user, t,
+    chat: { members }
   }) {
-    if (chat.type !== 1) {
-      throw this.Boom.forbidden(`It's disallow to add new member to not a group chat`);
-    }
-    const { user_id: memberId } = params;
+    const userIds = [...new Set(body.user_ids)];
     /**
-     * Check whether user already in chat
+     * Check whether a user is already in a chat
      */
-    if (chat.members.find(m => m.user_id === memberId) instanceof Object) {
-      throw this.Boom.badRequest('User already is in the chat');
+    for (let a = 0; a < userIds.length; a++) {
+      const userId = userIds[a];
+      if (members.find(member => member.user_id === userId) instanceof Object) {
+        throw this.Boom.badRequest({
+          user_ids: t('chat.user-already-in-chat')
+        });
+      }
     }
-    const member = await this.db.User.findOne({ _id: memberId });
-    if (!(member instanceof Object)) {
-      throw this.Boom.badRequest('User does not exist');
+    /**
+     * Check the correctness of all users ids
+     */
+    const users = await this.db.User.find({
+      _id: userIds
+    }, '_id, name');
+    if (users.length !== userIds.length) {
+      throw this.Boom.badRequest({
+        user_id: t('user.not-found')
+      });
     }
-    await this.db.Chat.addMember({ member, chat });
+    const params = {
+      adminId: user._id,
+      chatId: body.chat_id,
+      users,
+      recipients: members.map(member => member.user_id)
+    };
+    await this.db.Chat.addMembers(params);
     return { ok: true };
   }
 }
