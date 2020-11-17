@@ -79,6 +79,7 @@ class Chat {
         'statuses.recipient_id': user._id
       },
       sort: { created_at: -1 },
+      select: '_id content type statuses author_id viewed created_at',
       limit,
       page
     });

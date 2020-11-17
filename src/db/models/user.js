@@ -99,4 +99,4 @@ const staticMethods = {
 userSchema.methods = instanceMethods;
 userSchema.statics = staticMethods;
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = userSchema;

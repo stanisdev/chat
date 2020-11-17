@@ -2,7 +2,6 @@
 
 const mongoose = require('mongoose');
 const { nanoid } = require('nanoid');
-const paginate = require('../../plugins/mongoosePaginate');
 
 const memberSchema = new mongoose.Schema({
   _id: false,
@@ -269,6 +268,5 @@ const staticMethods = {
 
 chatSchema.statics = staticMethods;
 chatSchema.methods = instanceMethods;
-chatSchema.plugin(paginate);
 
-module.exports = mongoose.model('Chat', chatSchema);
+module.exports = chatSchema;

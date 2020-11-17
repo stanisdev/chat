@@ -30,7 +30,18 @@ class Db {
       .forEach(filePath => {
         const fileName = basename(filePath).slice(0, -3);
         const modelName = fileName.slice(0, 1).toUpperCase() + fileName.slice(1);
-        models[modelName] = require(filePath);
+        
+        const modelSchema = require(filePath);
+        /**
+         * Appoint the plugins
+         */
+        glob
+          .sync(this.config.dbDirs.plugins + '/*.js')
+          .forEach(pluginPath => {
+            const plugin = require(pluginPath);
+            modelSchema.plugin(plugin);
+          });
+        models[modelName] = mongoose.model(modelName, modelSchema);
       });
     return models;
   }

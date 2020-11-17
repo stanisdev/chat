@@ -47,6 +47,7 @@ const config = {
     models: join(rootDir, 'db', 'models'),
     scripts: join(rootDir, 'db', 'scripts'),
     seeders: join(rootDir, 'db', 'seeders'),
+    plugins: join(rootDir, 'db', 'plugins')
   },
   logging,
   mongo: {
