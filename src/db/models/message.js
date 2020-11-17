@@ -88,6 +88,24 @@ const staticMethods = {
         }
       }
     });
+  },
+
+  findManyByCriteria({
+    chatId,
+    userId,
+    limit,
+    page
+  }) {
+    return this.findAndPaginate({
+      query: {
+        chat_id: chatId,
+        'statuses.recipient_id': userId
+      },
+      sort: { created_at: -1 },
+      select: '_id content type statuses author_id viewed metadata created_at',
+      limit,
+      page
+    });
   }
 };
 

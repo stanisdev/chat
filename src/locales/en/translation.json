@@ -14,7 +14,7 @@
     "user-left-chat": "left the chat",
     "user-is-not-admin": "The chat is not available for editing",
     "user-already-in-chat": "The user already in the chat",
-    "user-added-to-chat": "was added to the chat"
+    "user-added-to-chat": "was added to the chat by"
   },
   "user": {
     "not-found": "User not found"

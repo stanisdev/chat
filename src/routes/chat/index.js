@@ -73,21 +73,27 @@ class Chat {
     chat,
     user, t
   }) {
-    const messages = await this.db.Message.findAndPaginate({
-      query: {
-        chat_id: chat._id,
-        'statuses.recipient_id': user._id
-      },
-      sort: { created_at: -1 },
-      select: '_id content type statuses author_id viewed created_at',
+    const params = {
+      chatId: chat._id,
+      userId: user._id,
       limit,
       page
-    });
-    const authorsIds = [...new Set(
-      messages.map(message => message.author_id)
-    )];
+    }
+    const messages = await this.db.Message.findManyByCriteria(params);
+    /**
+     * Get basic information about all authors
+     */
+    let authorsIds = new Set();
+    for (let a = 0; a < messages.length; a++) {
+      const message = messages[a];
+
+      if (message.type === 'system/message' && message.metadata?.user_id) {
+        authorsIds.add(message.metadata.user_id);
+      }
+      authorsIds.add(message.author_id);
+    }
     const authors = await this.db.User.find({
-      _id: { $in: authorsIds }
+      _id: { $in: [...authorsIds] }
     }, '_id, name');
 
     /**
@@ -100,7 +106,8 @@ class Chat {
       content,
       type,
       statuses,
-      viewed
+      viewed,
+      metadata
     }) => {
       const author = authors.find(author => author._id === author_id);
       const message = {
@@ -125,11 +132,14 @@ class Chat {
       /**
        * Set appropriate translation for a message
        * with status 'system/message'
-       * 
-       * @todo: Process the case when a user was added
        */
-      if (message.type === 'system/message') {
-        message.content = message.author.name + ' ' + t(`chat.${message.content}`);
+      if (type === 'system/message') {
+        if (content === 'user-added-to-chat') {
+          const member = authors.find(author => author._id === metadata.user_id);
+          message.content = `${member.name} ` + t(`chat.${content}`) + ` ${author.name}`;
+        } else {
+          message.content = author.name + ' ' + t(`chat.${content}`);
+        }
       }
       return message;
     });
